@@ -1,0 +1,105 @@
+# 0.verilator export：
+VERILATOR = $(VERILATOR_ROOT)/bin/verilator
+
+# 1.files info:
+PROJ_PATH = $(shell pwd)
+VSRCS += $(shell find $(abspath ./vsrc) -name "*.v" -not -path "$(abspath ./vsrc/tb)/*")
+CSRCS += $(shell find $(abspath ./csrc) -name "*.c" -or -name "*.cc" -or -name "*.cpp")
+TOP_MODULE ?= top
+SEARCHPATH ?= $(PROJ_PATH)/vsrc
+
+# 2.yosys-sta info：
+export CLK_FREQ_MHZ := 500
+LIB_PATH = $(PROJ_PATH)/yosys
+SDC_FILE ?= $(PROJ_PATH)/sdc/$(TOP_MODULE).sdc
+RTL_FILES ?= $(shell find $(PROJ_PATH)/vsrc -name "*.v")
+RESULT_DIR = $(LIB_PATH)/result/$(TOP_MODULE)-$(CLK_FREQ_MHZ)MHz
+SCRIPT_DIR = $(LIB_PATH)/scripts
+NETLIST_SYN_V   = $(RESULT_DIR)/$(TOP_MODULE).netlist.syn.v
+NETLIST_FIXED_V = $(RESULT_DIR)/$(TOP_MODULE).netlist.fixed.v
+TIMING_RPT = $(RESULT_DIR)/$(TOP_MODULE).rpt
+
+# 3.run info: 
+LOG ?= $(PROJ_PATH)/build/npc-log.txt
+IMG ?= ../am-kernels/tests/cpu-tests/build/mersenne-riscv32-nemu.bin	# program img, run on npc.
+DIFFTEST ?= ${NEMU_HOME}/build/riscv32-nemu-interpreter-so#			# nemu img, use for difftest.
+BUILD_DIR = ./build
+OBJ_DIR = $(BUILD_DIR)/obj_dir
+INC_PATH = $(OBJ_DIR)
+BIN = $(BUILD_DIR)/$(TOP_MODULE)
+RUN_FLAG += --img=$(IMG) --log=$(LOG) --diff=$(DIFFTEST)
+#RUN_FLAG += --batch
+NPC_EXEC = $(BIN) #$(RUN_FLAG)
+
+# 4.verilator flags:
+INCFLAGS += $(addprefix -I, $(INC_PATH))
+INCFLAGS += -I$(abspath $(NEMU_HOME)/tools/capstone/repo/include) 
+INCFLAGS += -I$(abspath ./csrc/include) 
+INCFLAGS += -I$(abspath ./csrc/include/memory)
+CXXFLAGS += $(INCFLAGS) -DTOP_MODULE="\"V$(TOP_MODULE)\""
+CXXFLAGS += -fpermissive
+VERILATOR_CFLAGS += -MMD --build -cc --trace -j -O3 --x-assign fast --x-initial fast --noassert
+VERILATOR_CFLAGS += -I${SEARCHPATH}
+VERILATOR_CFLAGS += -DSIMULATION
+LDFLAGS += -lreadline /home/k-shi/ysyx/ysyx-workbench/nemu/tools/capstone/repo/libcapstone.so.5
+
+.PHONY:run gdb wave clean
+
+com: $(VSRCS) $(CSRCS)
+	@rm -rf $(OBJ_DIR) ./prj ./user
+	$(VERILATOR) $(VERILATOR_CFLAGS) \
+		--top-module $(TOP_MODULE) $^ \
+		$(addprefix -CFLAGS , $(CXXFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
+		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
+
+default: com
+$(shell mkdir -p $(BUILD_DIR))
+
+# wave simulation
+run: com
+	$(call git_commit, "sim RTL") # SIM RTL SUCCESS!!!
+	@$(NPC_EXEC)
+
+gdb:com ${DIFFTEST}
+	$(call git_commit, "gdb RTL") # GDB RTL SUCCESS!!!
+	@gdb --silent -s ${BIN} --args ${NPC_EXEC}
+
+wave:
+	gtkwave dump.vcd
+
+# yosys simulation
+yos: MODULE ?= exu
+yos:
+	yowasp-yosys -p "read_verilog -sv ./vsrc/$(MODULE).v; hierarchy -top $(MODULE); proc; flatten; show -format dot -prefix $(MODULE); stat"
+
+# vivado simulation
+vivado:
+	$(VIVADO) -mode batch -source $(TCL_SCRIPT)
+
+
+init:
+	bash -c "$$(wget -O - https://ysyx.oscc.cc/slides/resources/scripts/init-yosys-sta.sh)"
+
+
+#yosys simulation
+syn: $(NETLIST_SYN_V)
+$(NETLIST_SYN_V): $(RTL_FILES) $(SCRIPT_DIR)/yosys.tcl
+	mkdir -p $(@D)
+	echo tcl $(SCRIPT_DIR)/yosys.tcl $(TOP_MODULE) \"$(RTL_FILES)\" $@ | yosys -l $(@D)/yosys.log -s -
+
+fix-fanout: $(NETLIST_FIXED_V)
+$(NETLIST_FIXED_V): $(SCRIPT_DIR)/fix-fanout.tcl $(SDC_FILE) $(NETLIST_SYN_V)
+	$(LIB_PATH)/bin/iEDA -script $^ $(TOP_MODULE) $@ 2>&1 | tee $(RESULT_DIR)/fix-fanout.log
+
+sta: $(TIMING_RPT)
+$(TIMING_RPT): $(SCRIPT_DIR)/sta.tcl $(SDC_FILE) $(NETLIST_FIXED_V)
+	$(LIB_PATH)/bin/iEDA -script $^ $(TOP_MODULE) 2>&1 | tee $(RESULT_DIR)/sta.log
+
+clean:
+	rm -rf $(BUILD_DIR) *.log *.dmp *.vpd core
+	-rm -rf $(VIVADO_PROJECT_NAME) $(PROJECT_NAME).runs $(PROJECT_NAME).sim $(PROJECT_NAME).cache $(PROJECT_NAME).hw $(PROJECT_NAME).ip_user_files $(PROJECT_NAME).xpr *.jou *.log *.str
+	-rm -rf $(LIB_PATH)/result/
+	-rm -rf ./reports ./prj ./user
+	-rm *.vcd *.view *.dot
+
+

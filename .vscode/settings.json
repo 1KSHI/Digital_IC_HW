@@ -1,0 +1,13 @@
+{
+    "verilog.linting.linter": "verilator",
+	"digital-ide.function.lsp.linter.verilog.diagnostor": "verilator",
+	"digital-ide.function.lsp.linter.systemverilog.diagnostor": "verilator",
+	"files.associations": {
+		"regex.h": "c",
+		"include.h": "c",
+		"paddr.h": "c",
+		"ratio": "cpp",
+		"capstone.h": "c",
+		"random": "cpp"
+	}
+}
