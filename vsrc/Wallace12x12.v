@@ -1,10 +1,12 @@
 module	Wallace12x12 ( 
 	input	[11:0]	x_in, y_in,
-	output	[24:0]	result_out
+	output	[23:0]	result_out
 );
 wire [23:0] opa, opb;	// 32-bit operands
 wire pp [11:0][11:0];	// 16x16 partial products
 genvar i, j;
+
+
 generate
     for (i = 0; i < 12; i = i + 1) begin: pp_gen
         for (j = 0; j < 12; j = j + 1) begin: pp_gen2
@@ -190,7 +192,7 @@ HalfAdder	fifha17(             Thi2_S[13], Thi2_C[12], Fif_S[17], Fif_C[17] );
 assign	opa = { Thi2_C[13], Fif_S[17: 0], Fou1_S[0], Thi1_S[0],Sec1_S[0], Fir1_S[0], pp[0][0] };
 assign	opb = { Fif_C[17: 0], 6'b0 };
 
-assign result_out = opa + opb;
+assign result_out = {opa + opb}[23:0];
 
 
 endmodule

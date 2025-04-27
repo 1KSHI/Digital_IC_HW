@@ -8,6 +8,9 @@
 		"paddr.h": "c",
 		"ratio": "cpp",
 		"capstone.h": "c",
-		"random": "cpp"
+		"random": "cpp",
+		"bitset": "cpp",
+		"chrono": "cpp",
+		"algorithm": "cpp"
 	}
 }
