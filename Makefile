@@ -9,7 +9,7 @@ TOP_MODULE ?= top
 SEARCHPATH ?= $(PROJ_PATH)/vsrc
 
 # 2.yosys-sta info：
-export CLK_FREQ_MHZ := 500
+export CLK_FREQ_MHZ := 150
 LIB_PATH = $(PROJ_PATH)/yosys
 SDC_FILE ?= $(PROJ_PATH)/sdc/$(TOP_MODULE).sdc
 RTL_FILES ?= $(shell find $(PROJ_PATH)/vsrc -name "*.v")

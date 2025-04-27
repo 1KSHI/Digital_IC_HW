@@ -192,7 +192,9 @@ HalfAdder	fifha17(             Thi2_S[13], Thi2_C[12], Fif_S[17], Fif_C[17] );
 assign	opa = { Thi2_C[13], Fif_S[17: 0], Fou1_S[0], Thi1_S[0],Sec1_S[0], Fir1_S[0], pp[0][0] };
 assign	opb = { Fif_C[17: 0], 6'b0 };
 
-assign result_out = {opa + opb}[23:0];
+wire [23:0] result_temp = opa + opb;
+
+assign result_out = result_temp[23:0];
 
 
 endmodule

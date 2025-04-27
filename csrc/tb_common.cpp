@@ -4,7 +4,7 @@
 extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
 extern Vtop* top;
-#define CONFIG_WAVETRACE 1
+#define CONFIG_WAVETRACE 0
 
 void step_wave(){
   top->eval();
