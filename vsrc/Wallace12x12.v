@@ -196,5 +196,129 @@ wire [23:0] result_temp = opa + opb;
 
 assign result_out = result_temp[23:0];
 
+// adder_24bit adder_24bit_inst(
+//     .opa(opa),
+//     .opb(opb),
+//     .result_out(result_out)
+// );
+
+endmodule
+
+
+module adder_24bit(
+    input [23:0] opa,
+    input [23:0] opb,
+    output [23:0] result_out
+);
+
+//============== First Level =================================================
+wire [7:0] res_7_0;
+wire sw2;
+
+cla_8bit u_carry_ahead(
+    .A(opa[7:0]),
+    .B(opb[7:0]),
+    .Cin(1'b0),
+    .Sum(res_7_0),
+    .Cout(sw2)
+);
+
+//============== Second Level =================================================
+wire [7:0] res_15_8_1, res_15_8_0;
+wire [7:0] res_15_8_fin;
+wire sw3_1, sw3_0, sw3;
+
+cla_8bit u_carry_ahead_21(
+    .A(opa[15:8]),
+    .B(opb[15:8]),
+    .Cin(1'b1),
+    .Sum(res_15_8_1),
+    .Cout(sw3_1)
+);
+
+cla_8bit u_carry_ahead_20(
+    .A(opa[15:8]),
+    .B(opb[15:8]),
+    .Cin(1'b0),
+    .Sum(res_15_8_0),
+    .Cout(sw3_0)
+);
+
+assign res_15_8_fin = sw2? (res_15_8_1) : (res_15_8_0);
+assign sw3 = sw2 ? sw3_1 : sw3_0;
+
+//============== Third  Level =================================================
+wire [7:0] res_23_16_1, res_23_16_0;
+wire [7:0] res_23_16_fin;
+wire cout_0, cout_1;
+
+cla_8bit u_carry_ahead_31(
+    .A(opa[23:16]),
+    .B(opb[23:16]),
+    .Cin(1'b1),
+    .Sum(res_23_16_1),
+    .Cout(cout_1)
+);
+
+cla_8bit u_carry_ahead_30(
+    .A(opa[23:16]),
+    .B(opb[23:16]),
+    .Cin(1'b0),
+    .Sum(res_23_16_0),
+    .Cout(cout_0)
+);
+
+assign res_23_16_fin = sw3? (res_23_16_1) : (res_23_16_0);
+
+assign result_out = {res_23_16_fin, res_15_8_fin, res_7_0};
+
+endmodule
+
+module cla_8bit(
+    input [7:0] A,
+    input [7:0] B,
+    input Cin,
+    output [7:0] Sum,
+    output Cout
+);
+
+    wire [7:0] G, P;
+    assign G = A & B;
+    assign P = A ^ B;
+    wire C0, C1, C2, C3, C4, C5, C6, C7;
+    assign C0 = Cin;
+
+    assign C1 = G[0] | (P[0] & C0);
+
+    assign C2 = G[1] | (P[1] & G[0]) | (P[1] & P[0] & C0);
+
+    assign C3 = G[2] | (P[2] & G[1]) | (P[2] & P[1] & G[0]) | (P[2] & P[1] & P[0] & C0);
+
+    assign C4 = G[3] | (P[3] & G[2]) | (P[3] & P[2] & G[1]) | 
+                (P[3] & P[2] & P[1] & G[0]) | (P[3] & P[2] & P[1] & P[0] & C0);
+
+    assign C5 = G[4] | (P[4] & G[3]) | (P[4] & P[3] & G[2]) | 
+                (P[4] & P[3] & P[2] & G[1]) | (P[4] & P[3] & P[2] & P[1] & G[0]) | 
+                (P[4] & P[3] & P[2] & P[1] & P[0] & C0);
+
+    assign C6 = G[5] | (P[5] & G[4]) | (P[5] & P[4] & G[3]) | 
+                (P[5] & P[4] & P[3] & G[2]) | (P[5] & P[4] & P[3] & P[2] & G[1]) | 
+                (P[5] & P[4] & P[3] & P[2] & P[1] & G[0]) | 
+                (P[5] & P[4] & P[3] & P[2] & P[1] & P[0] & C0);
+
+    assign C7 = G[6] | (P[6] & G[5]) | (P[6] & P[5] & G[4]) | 
+                (P[6] & P[5] & P[4] & G[3]) | (P[6] & P[5] & P[4] & P[3] & G[2]) | 
+                (P[6] & P[5] & P[4] & P[3] & P[2] & G[1]) | 
+                (P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & G[0]) | 
+                (P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & P[0] & C0);
+
+    assign Cout = G[7] | (P[7] & G[6]) | (P[7] & P[6] & G[5]) | 
+                 (P[7] & P[6] & P[5] & G[4]) | (P[7] & P[6] & P[5] & P[4] & G[3]) | 
+                 (P[7] & P[6] & P[5] & P[4] & P[3] & G[2]) | 
+                 (P[7] & P[6] & P[5] & P[4] & P[3] & P[2] & G[1]) | 
+                 (P[7] & P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & G[0]) | 
+                 (P[7] & P[6] & P[5] & P[4] & P[3] & P[2] & P[1] & P[0] & C0);
+
+    assign Sum = P ^ {C7, C6, C5, C4, C3, C2, C1, C0};
 
 endmodule
