@@ -71,7 +71,7 @@ void data_test(int num){
         a_mem[i] = a;
         b_mem[i] = b;
         c_mem[i] = c;
-        // printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+        //printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
         cycle(1);
     }
 }
@@ -80,12 +80,13 @@ void data_test(int num){
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
+    // srand(42);
     d = rand() % 4096;
     // d = 1383;
     give_e(d);
     cycle(1);
 
-    data_test(20);
+    data_test(30);
 
     cycle(20);
     // for(int i = 0; i < 1; i++) {
