@@ -1,5 +1,19 @@
 #include "verilated_dpi.h"
 
-extern "C" void check_finsih(int ins,int a0zero){
+extern int a_mem[4096];
+extern int b_mem[4096];
+extern int c_mem[4096];
+extern int d;
+extern void cor_y(int a,int b, int c, int d);
+extern int count_dpi;
 
+extern "C" void check_finsih(int y){
+    if(count_dpi > 0){
+        int a = a_mem[count_dpi-1];
+        int b = b_mem[count_dpi-1];
+        int c = c_mem[count_dpi-1];
+        printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        cor_y(a, b, c, d);
+    }
+    count_dpi++;
 }

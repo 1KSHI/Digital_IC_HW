@@ -6,6 +6,10 @@ VerilatedVcdC* tfp = NULL;
 Vtop* top;
 #define PI 3.14159265358979323846
 #define PRINTF 1
+int count_dpi = 0;
+int a_mem[4096];
+int b_mem[4096];
+int c_mem[4096];
 
 int count = 0;
 int success = 0;
@@ -56,39 +60,61 @@ void give_e(int e){
 }
 
 
+void data_test(int num){
+    for(int i = 0; i < num; i++) {
+        a = rand() % 4096;
+        b = rand() % 4096;
+        c = rand() % 4096;
+        top->a=a;
+        top->b=b;
+        top->c=c;
+        a_mem[i] = a;
+        b_mem[i] = b;
+        c_mem[i] = c;
+        // printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+        cycle(1);
+    }
+}
+
+
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
-    // d = rand() % 4096;
-    d = 1383;
+    d = rand() % 4096;
+    // d = 1383;
     give_e(d);
-    for(int i = 0; i < 1; i++) {
-        cycle(1);
-        // a = rand() % 4096;a=966, b=2153, c=2163, d=1383
-        // b = rand() % 4096;
-        // c = rand() % 2046;
-        a = 323;
-        b = 2153;
-        c = 23;
-        top->a=a;
-        top->b=b;
-        top->c=c;
-        printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
-        cycle(1);
-        a = 12;
-        b = 334;
-        c = 12;
-        top->a=a;
-        top->b=b;
-        top->c=c;
-        printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
-        cycle(16);
-        cor_y(323, 2153, 23, top->d);
-        cycle(1);
-        cor_y(12, 334, 12, top->d);
-    }
-    printf("success=%d, count=%d rate=%d%%\n", success, count, success*100/count);
-    cycle(11);
+    cycle(1);
+
+    data_test(20);
+
+    cycle(20);
+    // for(int i = 0; i < 1; i++) {
+    //     cycle(1);
+    //     // a = rand() % 4096;a=966, b=2153, c=2163, d=1383
+    //     // b = rand() % 4096;
+    //     // c = rand() % 2046;
+    //     a = 323;
+    //     b = 2153;
+    //     c = 23;
+    //     top->a=a;
+    //     top->b=b;
+    //     top->c=c;
+    //     printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+    //     cycle(1);
+    //     a = 12;
+    //     b = 334;
+    //     c = 12;
+    //     top->a=a;
+    //     top->b=b;
+    //     top->c=c;
+    //     printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+    //     cycle(16);
+    //     cor_y(323, 2153, 23, top->d);
+    //     cycle(1);
+    //     cor_y(12, 334, 12, top->d);
+    // }
+    // printf("success=%d, count=%d rate=%d%%\n", success, count, success*100/count);
+    // cycle(11);
     sim_exit();
 
     return 0;

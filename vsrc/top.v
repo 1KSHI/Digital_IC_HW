@@ -1,3 +1,5 @@
+import "DPI-C" function void check_finsih(int y);
+
 module top(
     input clk,
     input rst,
@@ -149,26 +151,27 @@ always @(posedge clk) begin
     end
 end
 
-
-// //a/(a+d) * b*cos c>>12 >>(12+11)
-// //============= cycle 4 ==============
-// reg [11:0] Fou1_reg;
-// wire [11:0] Fou1_wire;
-
-// Shift12 Shift12 (
-//     .x_in(Thi1_reg),
-//     .result_out(Fou1_wire)
-// );
-
-// always @(posedge clk) begin
-//     if (rst) begin
-//         Fou1_reg <= 0;
-//     end else begin
-//         Fou1_reg <= Fou1_wire;
-//     end
-// end
+reg [2:0]finish;
+always @(posedge clk) begin
+    if (rst) begin
+        finish[0] <= 0;
+        finish[1] <= 0;
+        finish[2] <= 0;
+    end else begin
+        finish[0] <= done;
+        finish[1] <= finish[0];
+        finish[2] <= finish[1];
+    end
+end
 
 
 assign y = {sign,Thi1_reg};
 
+always @(posedge clk)begin
+    if( finish[2] == 1'b1)begin
+        check_finsih({19'b0,y});
+    end
+end
+
 endmodule
+
