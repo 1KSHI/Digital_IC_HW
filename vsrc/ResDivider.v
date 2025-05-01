@@ -15,7 +15,7 @@ reg         [11:0] qo [0:11];
 reg         [13:0] re [0:11];
 wire signed [13:0] cal[0:11];
 reg         [11:0] sign;
-reg         [11:0] done_reg;
+reg         [12:0] done_reg;
 
 //========== cycle 0  ===============
 always @(posedge clk) begin
@@ -265,8 +265,10 @@ end
 always @(posedge clk) begin
     if (rst) begin
         done <= 1'b0;
+        done_reg[12] <= 1'b0;
     end else if (start) begin
-        done <= done_reg[11];
+        done_reg[12] <= done_reg[11];
+        done <= done_reg[12];
     end
 end
 assign quotient = qo[11][11:0];

@@ -13,6 +13,7 @@ assign d = d_reg;
 reg [3:0]count;
 wire init_end = (count == 4'd12) ? 1'b1 : 1'b0;
 
+
 always @(posedge clk) begin
     if (rst) begin
         count <= 0;
@@ -49,6 +50,7 @@ wire [11:0] Fir2_wire;
 wire sign = Fir2_reg[11];
 reg [12:0] Fir1_reg;//(a+d)
 reg [11:0] Fir2_reg;//cos c>>12
+reg [11:0] Fir3_reg;//cos c>>12
 
 Adder12 Adder12 (
     .x_in(a_reg),
@@ -65,9 +67,11 @@ always @(posedge clk) begin
     if (rst) begin
         Fir1_reg <= 0;
         Fir2_reg <= 0;
+        Fir3_reg <= 0;
     end else begin
         Fir1_reg <= Fir1_wire;
         Fir2_reg <= Fir2_wire;
+        Fir3_reg <= a_reg;
     end
 end
 
@@ -83,7 +87,7 @@ ResDivider ResDivider(
     .clk       	(clk          ),
     .rst       	(rst          ),
     .start 	    (init_end     ),
-    .dividend   ({1'b0,a_reg} ),
+    .dividend   ({1'b0,Fir3_reg} ),
     .divisor 	(Fir1_reg     ),
     .quotient   (Sec1_wire    ),//Q1.12
     .done 	    (done         )
@@ -102,7 +106,7 @@ wire fifo_empty;
 
 fifo #(
     .DATAWIDTH(12),
-    .DEPTH(8)
+    .DEPTH(16)
 ) fifo (
     .clk        (clk            ),
     .rst        (rst            ),
@@ -132,7 +136,7 @@ wire [23:0] Thi1_wire;
 reg [11:0] Thi1_reg;
 
 Wallace12x12 Wallace12x12_2 (
-    .x_in(Sec1_reg       ),//Q.12
+    .x_in({Sec1_reg[10:0],1'b0}       ),//Q.12
     .y_in(fifo_out       ),//Q.12
     .result_out(Thi1_wire)
 );

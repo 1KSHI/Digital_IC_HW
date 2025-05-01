@@ -60,22 +60,32 @@ int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
     // d = rand() % 4096;
-    d = 5;
+    d = 1383;
     give_e(d);
     for(int i = 0; i < 1; i++) {
         cycle(1);
         // a = rand() % 4096;a=966, b=2153, c=2163, d=1383
         // b = rand() % 4096;
         // c = rand() % 2046;
-        a = 5;
-        b = 1;
-        c = 1;
+        a = 323;
+        b = 2153;
+        c = 23;
         top->a=a;
         top->b=b;
         top->c=c;
-        cycle(17);
         printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
-        cor_y(top->a, top->b, top->c, top->d);
+        cycle(1);
+        a = 12;
+        b = 334;
+        c = 12;
+        top->a=a;
+        top->b=b;
+        top->c=c;
+        printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+        cycle(16);
+        cor_y(323, 2153, 23, top->d);
+        cycle(1);
+        cor_y(12, 334, 12, top->d);
     }
     printf("success=%d, count=%d rate=%d%%\n", success, count, success*100/count);
     cycle(11);
