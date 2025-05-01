@@ -42,73 +42,98 @@ always @(posedge clk) begin
     end
 end
 
-//a*b    //(a+d)  //cos c>>12
-wire [23:0] Fir1_wire;
-wire [12:0] Fir2_wire;
-wire [12:0] Fir3_wire;
-
-reg [23:0] Fir1_reg;//a*b 
-reg [12:0] Fir2_reg;//(a+d)
-reg [12:0] Fir3_reg;//cos c>>12
-
-Wallace12x12 Wallace12x12 (
-    .x_in(a_reg),
-    .y_in(b_reg),
-    .result_out(Fir1_wire)
-);
+//(a+d)  
+//============= cycle 1 ==============
+wire [12:0] Fir1_wire;
+wire [11:0] Fir2_wire;
+wire sign = Fir2_reg[11];
+reg [12:0] Fir1_reg;//(a+d)
+reg [11:0] Fir2_reg;//cos c>>12
 
 Adder12 Adder12 (
     .x_in(a_reg),
     .y_in(d_reg),
-    .result_out(Fir2_wire)
+    .result_out(Fir1_wire)
 );
 
 Rom Rom(
     .x_in       	(c_reg        ),
-    .result_out 	(Fir3_wire    )
+    .res_out 	    (Fir2_wire    )
 );
-
 
 always @(posedge clk) begin
     if (rst) begin
         Fir1_reg <= 0;
         Fir2_reg <= 0;
-        Fir3_reg <= 0;
     end else begin
         Fir1_reg <= Fir1_wire;
         Fir2_reg <= Fir2_wire;
-        Fir3_reg <= Fir3_wire;
     end
 end
 
-//a*b/(a+d) 
-wire [23:0] Sec1_wire;
+//a/(a+d)    //b*cos c>>12  //fifo
+//============= cycle 2 ==============
+wire [11:0] Sec1_wire;
+wire [23:0] Sec2_wire;
+wire done;
+reg [11:0] Sec1_reg;//a*b/(a+d)
+reg [23:0] Sec2_reg;//(b*cos c)>>12
 
-reg [23:0] Sec1_reg;//a*b/(a+d)
+ResDivider ResDivider(
+    .clk       	(clk          ),
+    .rst       	(rst          ),
+    .start 	    (init_end     ),
+    .dividend   ({1'b0,a_reg} ),
+    .divisor 	(Fir1_reg     ),
+    .quotient   (Sec1_wire    ),//Q1.12
+    .done 	    (done         )
+);
 
-Divder12 u_Divder12(
-    .x_in       	(Fir1_reg     ),
-    .y_in       	({11'b0,Fir2_reg}     ),
-    .result_out 	(Sec1_wire    )
+
+Wallace12x12 Wallace12x12 (
+    .x_in(b_reg         ),//Q12 
+    .y_in({Fir2_reg[10:0],1'b0}),//Q.12
+    .result_out(Sec2_wire)
+);
+
+wire [11:0] fifo_out;
+wire fifo_full;
+wire fifo_empty;
+
+fifo #(
+    .DATAWIDTH(12),
+    .DEPTH(8)
+) fifo (
+    .clk        (clk            ),
+    .rst        (rst            ),
+    .data_in    (Sec2_wire[23:12]),//Q12
+    .wr_en      (init_end       ),
+    .rd_en      (done           ),
+    .data_out   (fifo_out       ),
+    .full       (fifo_full      ),
+    .empty      (fifo_empty     )
 );
 
 
 always @(posedge clk) begin
     if (rst) begin
         Sec1_reg <= 0;
+        Sec2_reg <= 0;
     end else begin
         Sec1_reg <= Sec1_wire;
+        Sec2_reg <= Sec2_wire;
     end
 end
 
 
-//a*b/(a+d) * cos c>>12
+//a/(a+d) *  b*cos c>>12
+//============= cycle 3 ==============
 wire [23:0] Thi1_wire;
-reg [23:0] Thi1_reg;
+reg [11:0] Thi1_reg;
 
 Wallace12x12 Wallace12x12_2 (
-    .x_in(Sec1_reg[11:0]),
-    .y_in(Fir3_reg[11:0]),
+    .x_in(Sec1_reg       ),//Q.12
+    .y_in(fifo_out       ),//Q.12
     .result_out(Thi1_wire)
 );
 
@@ -116,29 +141,30 @@ always @(posedge clk) begin
     if (rst) begin
         Thi1_reg <= 0;
     end else begin
-        Thi1_reg <= Thi1_wire;
+        Thi1_reg <= Thi1_wire[23:12];
     end
 end
 
 
-//a*b/(a+d) * cos c>>12 >>(12+10)
-reg [11:0] Fou1_reg;
-wire [11:0] Fou1_wire;
+// //a/(a+d) * b*cos c>>12 >>(12+11)
+// //============= cycle 4 ==============
+// reg [11:0] Fou1_reg;
+// wire [11:0] Fou1_wire;
 
-Shift12 Shift12 (
-    .x_in(Thi1_reg),
-    .result_out(Fou1_wire)
-);
+// Shift12 Shift12 (
+//     .x_in(Thi1_reg),
+//     .result_out(Fou1_wire)
+// );
 
-always @(posedge clk) begin
-    if (rst) begin
-        Fou1_reg <= 0;
-    end else begin
-        Fou1_reg <= Fou1_wire;
-    end
-end
+// always @(posedge clk) begin
+//     if (rst) begin
+//         Fou1_reg <= 0;
+//     end else begin
+//         Fou1_reg <= Fou1_wire;
+//     end
+// end
 
 
-assign y = {Fir3_reg[12],Fou1_reg};
+assign y = {sign,Thi1_reg};
 
 endmodule

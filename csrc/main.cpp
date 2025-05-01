@@ -5,7 +5,7 @@ VerilatedContext* contextp = NULL;
 VerilatedVcdC* tfp = NULL;
 Vtop* top;
 #define PI 3.14159265358979323846
-#define PRINTF 0
+#define PRINTF 1
 
 int count = 0;
 int success = 0;
@@ -21,27 +21,16 @@ void cor_y(int a,int b, int c, int d){
     printf("y_true=%.15f  ", y_true);
     #endif
 
-    int y_result = top->y;
-    double y_dut = 0;
-    for(int i = 0; i < 12; i++) {
-        if(y_result & 1<<i){
-            y_dut += pow(2, -(12-i));
-        }else{
-            y_dut += 0;
-        }
-        y_result>>1;
-    }
-    if(y_result & 1<<12){
-            
-        y_dut = -y_dut;
-    }else{
-        y_dut = y_dut;
+    float y_result = top->y&0xFFF;
+    int sign = top->y>>12;
+    if(sign == 1){
+        y_result = -y_result;
     }
     #if PRINTF 
-    printf("y=%.15f  ", y_dut);
+    printf("y=%.15f  ", y_result/pow(2,12));
     #endif
     double error = 0;
-    error = fabs(y_dut - y_true);
+    error = fabs(y_result/pow(2,12) - y_true);
     #if PRINTF 
     printf("error=%.15f \n", error);
     #endif
@@ -70,22 +59,26 @@ void give_e(int e){
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
-    d = rand() % 4096;
+    // d = rand() % 4096;
+    d = 5;
     give_e(d);
-    for(int i = 0; i < 10000; i++) {
+    for(int i = 0; i < 1; i++) {
         cycle(1);
-        a = rand() % 4096;
-        b = rand() % 4096;
-        c = rand() % 2048;
+        // a = rand() % 4096;a=966, b=2153, c=2163, d=1383
+        // b = rand() % 4096;
+        // c = rand() % 2046;
+        a = 5;
+        b = 1;
+        c = 1;
         top->a=a;
         top->b=b;
         top->c=c;
-        cycle(5);
+        cycle(17);
         printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
         cor_y(top->a, top->b, top->c, top->d);
     }
     printf("success=%d, count=%d rate=%d%%\n", success, count, success*100/count);
-
+    cycle(11);
     sim_exit();
 
     return 0;
