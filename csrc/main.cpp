@@ -6,6 +6,7 @@ VerilatedVcdC* tfp = NULL;
 Vtop* top;
 #define PI 3.14159265358979323846
 #define PRINTF 1
+#define PRINTF_DAT 0
 int count_dpi = 0;
 int a_mem[4096];
 int b_mem[4096];
@@ -21,7 +22,7 @@ int d = 1383;
 void cor_y(int a,int b, int c, int d){
     double y_true = 0;
     y_true = (a*b*cos(2*PI*c/pow(2, 12)))/(a+d)/pow(2, 12);
-    #if PRINTF 
+    #if PRINTF_DAT 
     printf("y_true=%.15f  ", y_true);
     #endif
 
@@ -30,12 +31,12 @@ void cor_y(int a,int b, int c, int d){
     if(sign == 1){
         y_result = -y_result;
     }
-    #if PRINTF 
+    #if PRINTF_DAT 
     printf("y=%.15f  ", y_result/pow(2,12));
     #endif
     double error = 0;
     error = fabs(y_result/pow(2,12) - y_true);
-    #if PRINTF 
+    #if PRINTF_DAT 
     printf("error=%.15f \n", error);
     #endif
     if(error < pow(2, -10)){
@@ -84,11 +85,9 @@ int main(int argc, char *argv[]) {
     d = rand() % 4096;
     // d = 1383;
     give_e(d);
-    cycle(1);
+    data_test(1000);
 
-    data_test(30);
-
-    cycle(20);
+    cycle(7);
     // for(int i = 0; i < 1; i++) {
     //     cycle(1);
     //     // a = rand() % 4096;a=966, b=2153, c=2163, d=1383

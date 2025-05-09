@@ -8,10 +8,10 @@ extern void cor_y(int a,int b, int c, int d);
 extern int count_dpi;
 
 extern "C" void check_finsih(int y){
-    int a = a_mem[count_dpi-1];
-    int b = b_mem[count_dpi-1];
-    int c = c_mem[count_dpi-1];
-    printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+    int a = a_mem[count_dpi];
+    int b = b_mem[count_dpi];
+    int c = c_mem[count_dpi];
+    //printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
     cor_y(a, b, c, d);
     count_dpi++;
 }

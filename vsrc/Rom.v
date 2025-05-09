@@ -1,4 +1,6 @@
 module Rom(
+    input clk,
+    input rst,
     input [11:0] x_in,
     output wire[11:0] res_out
 );
@@ -37,10 +39,18 @@ always @(*) begin
         end
     endcase
 end
+reg [9:0] addr_reg;
+always @(posedge clk) begin
+    if(rst)begin
+        addr_reg <= 0;
+    end else begin
+        addr_reg <= addr;
+    end
+end
 
 
 always @(*) begin
-    case(addr)
+    case(addr_reg)
     0    : result_out = {sign,11'd2047};
     1    : result_out = {sign,11'd2047};
     2    : result_out = {sign,11'd2047};
@@ -1070,6 +1080,4 @@ always @(*) begin
 end
 
 endmodule
-
-
 
