@@ -1,4 +1,3 @@
-
 module top(
     input clk,
     input rst,
@@ -28,229 +27,289 @@ always @(posedge clk) begin
     end
 end
 
-reg [11:0] a_reg;
-reg [11:0] b_reg;
-reg [11:0] c_reg;
-
-always @(posedge clk) begin
-    if (rst) begin
-        a_reg <= 0;
-        b_reg <= 0;
-        c_reg <= 0;
-    end else begin
-        a_reg <= a;
-        b_reg <= b;
-        c_reg <= c;
-    end
-end
-
-
 
 //(a+d)  
-//============= cycle 1 ==============
-wire [12:0] Fir1_add_wire;
-wire [11:0] Fir2_rom_wire;
-reg [12:0] Fir1_add_reg;//(a+d)
-reg [11:0] Fir2_rom_reg;//cos c>>12
-reg [11:0] Fir3_a_reg;//a
-reg [11:0] Fir4_b_reg;//b
+//=========================== cycle 1 ============================
+wire [12:0] Fir_add_wire;
+reg  [10:0] Fir_add_reg;
+
+wire [11:0] Sec_rom_wire;
+reg  [11:0] Sec_rom_reg;//cos c>>12
+
+reg [11:0] Fir_a_reg;//a
+reg [11:0] Fir_b_reg;//b
 
 Adder12 Adder12 (
-    .x_in      (a_reg    ),
+    .x_in      (a    ),
     .y_in      (d_reg    ),
-    .result_out(Fir1_add_wire)
+    .result_out(Fir_add_wire)
 );
 
 Rom Rom(
     .clk       (clk          ),
     .rst       (rst          ),
-    .x_in       	(c_reg        ),
-    .res_out 	    (Fir2_rom_wire    )
+    .x_in       	(c        ),
+    .res_out 	    (Sec_rom_wire    )
 );
 
 always @(posedge clk) begin
     if (rst) begin
-        Fir1_add_reg <= 0;
-        Fir2_rom_reg <= 0;
-        Fir3_a_reg <= 0;
-        Fir4_b_reg <= 0;
+        Sec_rom_reg <= 0;
+        Fir_a_reg <= 0;
+        Fir_b_reg <= 0;
     end else begin
-        Fir1_add_reg <= Fir1_add_wire;
-        Fir2_rom_reg <= Fir2_rom_wire;
-        Fir3_a_reg <= a_reg;
-        Fir4_b_reg <= b_reg;
+        Sec_rom_reg <= Sec_rom_wire;
+        Fir_a_reg <= a;
+        Fir_b_reg <= b;
     end
 end
 
 reg [1:0] sftadd1;
-reg [10:0] add_div;
+reg [1:0] sftsel;
+
 always @(posedge clk) begin
-    if (Fir1_add_wire[12]) begin
-        add_div <= Fir1_add_wire[12:2];
-        sftadd1 <= 2'b10;
+    if (Fir_add_wire[12]) begin
+        Fir_add_reg <= Fir_add_wire[12:2];
+        sftsel <= 2'b10;
     end
     else begin
-        if (Fir1_add_wire[11]) begin
-            add_div <= Fir1_add_wire[11:1];
-            sftadd1 <= 2'b01;
+        if (Fir_add_wire[11]) begin
+            Fir_add_reg <= Fir_add_wire[11:1];
+            sftsel <= 2'b01;
         end
         else begin
-            add_div <= Fir1_add_wire[10:0];
-            sftadd1 <= 2'b00;
+            Fir_add_reg <= Fir_add_wire[10:0];
+            sftsel <= 2'b00;
         end
     end
 end//a+d得到结果
 
-reg  [14:0]sign_pipe ;
-
+reg  Fir_sign_reg;
 always @(posedge clk) begin
     if (rst) begin
-        sign_pipe[0] <= 0;
-        sign_pipe[1] <= 0;
-        sign_pipe[2] <= 0;
+        Fir_sign_reg <= 0;
     end else begin
-        sign_pipe[0] <= Fir2_rom_reg[11];
-        sign_pipe[1] <= sign_pipe[0];
-        sign_pipe[2] <= sign_pipe[1];
+        Fir_sign_reg <= Sec_rom_reg[11];
     end
 end
-//1/(a+d)    
-//============= cycle 2 ==============
-wire [11:0] Sec1_div_wire;
-wire [3:0]  Sec_sft_wire;
-wire done;
-reg [11:0] Sec1_div_reg;//a*b/(a+d)
-reg [3:0]  Sec_sft_reg;
-reg [11:0] Sec3_reg;//a
 
+reg Fir_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Fir_end_reg <= 0;
+    end else begin
+        Fir_end_reg <= init_end;
+    end
+end
+
+//1/(a+d)    
+//=========================== cycle 2 ============================
+wire [11:0] Sec_div_wire;
+reg  [11:0] Sec_div_reg;//a*b/(a+d)
+
+wire [3:0]  Sec_sft_wire;
+reg  [3:0]  Sec_sft_reg;
+
+reg  [11:0] Sec_a_reg;//a
 
 DivRom DivRom(
-    .in  (add_div        ),
+    .sel(sftsel),
+    .in  (Fir_add_reg        ),
     .sft (Sec_sft_wire       ),//Q1.12
-    .div (Sec1_div_wire            )
+    .div (Sec_div_wire            )
 );
 
 
 always @(posedge clk) begin
     if (rst) begin
-        Sec1_div_reg <= 0;
-        Sec3_reg <= 0;
+        Sec_div_reg <= 0;
+        Sec_a_reg <= 0;
         Sec_sft_reg <= 0;
     end else begin
-        Sec1_div_reg <= Sec1_div_wire;
-        Sec_sft_reg <= Sec_sft_wire + sftadd1;
-        Sec3_reg <= Fir3_a_reg;
+        Sec_div_reg <= Sec_div_wire;
+        Sec_sft_reg <= Sec_sft_wire;
+        Sec_a_reg <= Fir_a_reg;
     end
 end
 
+reg [11:0] Sec_b_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Sec_b_reg <= 0;
+    end else begin
+        Sec_b_reg <= Fir_b_reg;
+    end
+end
+
+reg Sec_sign_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Sec_sign_reg <= 0;
+    end else begin
+        Sec_sign_reg <= Fir_sign_reg;
+    end
+end
+
+reg Sec_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Sec_end_reg <= 0;
+    end else begin
+        Sec_end_reg <= Fir_end_reg;
+    end
+end
+
+//a * 1/(a+d)  //b*cos c>>12
+//=========================== cycle 3 4 ============================//两周期
+wire [23:0]  Thi_muldiv_wire;
+reg  [23:0]  Thi_muldiv_reg;
+
+reg  [3:0]   Thi_sft_reg;
+reg  [3:0]   Fou_sft_reg;
 
 
-
-//a * 1/(a+d) //b*cos c>>12
-//============= cycle 3 ==============//两周期
-wire [23:0] Thi1_wire;
-reg  [3:0]  Thi_sft_reg;
-reg [23:0]  Thi1_reg;
-
-wire [23:0] Thi2_bcos_wire;//(b*cos c)>>12
-reg [11:0] Thi2_bcos_reg;//(b*cos c)>>12
+wire [23:0] Thi_bcos_wire;//(b*cos c)>>12
+reg [11:0] Thi_bcos_reg;//(b*cos c)>>12
 
 Wallace12x12 Wallace12x12_2 (
     .clk        (clk          ),
     .rst        (rst          ),
-    .x_in       (Sec3_reg             ),//Q.12
-    .y_in       (Sec1_div_reg             ),//Q.12
-    .result_out (Thi1_wire            )//Q.24
+    .x_in       (Sec_a_reg             ),
+    .y_in       (Sec_div_reg             ),
+    .result_out (Thi_muldiv_wire          )
 );
 
 Wallace12x12 Wallace12x12_1 (
     .clk        (clk          ),
     .rst        (rst          ),
-    .x_in       (Fir4_b_reg             ),//Q12 
-    .y_in       ({Fir2_rom_reg[10:0],1'b0}),//Q.12
-    .result_out (Thi2_bcos_wire            )
+    .x_in       (Sec_b_reg             ),
+    .y_in       ({Sec_rom_reg[10:0],1'b0}),//Q.12
+    .result_out (Thi_bcos_wire            )
 );
 
 always @(posedge clk) begin
     if (rst) begin
-        Thi1_reg <= 0;
+        Thi_muldiv_reg <= 0;
         Thi_sft_reg <= 0;
-        Thi2_bcos_reg <= 0;
+        Fou_sft_reg <= 0;
+        Thi_bcos_reg <= 0;
     end else begin
         Thi_sft_reg <= Sec_sft_reg;
-        Thi1_reg <= Thi1_wire;
-        Thi2_bcos_reg <= Thi2_bcos_wire[11:0];
+        Fou_sft_reg <= Thi_sft_reg;
+        Thi_muldiv_reg <= Thi_muldiv_wire;
+        Thi_bcos_reg <= Thi_bcos_wire[23:12];
     end
 end
+
+reg Thi_sign_reg;
+reg Fou_sign_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Thi_sign_reg <= 0;
+        Fou_sign_reg <= 0;
+    end else begin
+        Thi_sign_reg <= Sec_sign_reg;
+        Fou_sign_reg <= Thi_sign_reg;
+    end
+end
+
+reg Thi_end_reg;
+reg Fou_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Thi_end_reg <= 0;
+        Fou_end_reg <= 0;
+    end else begin
+        Thi_end_reg <= Sec_end_reg;
+        Fou_end_reg <= Thi_end_reg;
+    end
+end
+
 //a * 1/(a+d) >> sft
-//============= cycle 4 ==============
-reg [11:0]  Fou1_reg;
+//=========================== cycle 5 ============================
+reg [11:0]  Fif_sft_reg;
 wire [23:0] shift_wire;
-assign shift_wire = Thi1_reg>>Thi_sft_reg;
+assign shift_wire = Thi_muldiv_reg>>Fou_sft_reg;
 
-reg [11:0] Fou_bcos_reg;//(b*cos c)>>12
+reg [11:0] Fif_bcos_reg;//(b*cos c)>>12
 
 always @(posedge clk) begin
     if (rst) begin
-        Fou1_reg <= 0;
+        Fif_sft_reg <= 0;
     end else begin
-        Fou1_reg <= shift_wire[11:0];
+        Fif_sft_reg <= shift_wire[11:0];
     end
 end
 
 always @(posedge clk) begin
     if (rst) begin
-        Fou_bcos_reg <= 0;
+        Fif_bcos_reg <= 0;
     end else begin
-        Fou_bcos_reg <= Thi2_bcos_reg;
+        Fif_bcos_reg <= Thi_bcos_reg;
     end
 end
 
-//============= cycle 5 ==============
-wire [23:0] Fif1_wire;
-reg [11:0]  Fif1_reg;
+reg Fif_sign_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Fif_sign_reg <= 0;
+    end else begin
+        Fif_sign_reg <= Fou_sign_reg;
+    end
+end
+reg Fif_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Fif_end_reg <= 0;
+    end else begin
+        Fif_end_reg <= Fou_end_reg;
+    end
+end
+//=========================== cycle 6 ============================
+wire [23:0] Six_mul_wire;
+reg [11:0]  Six_mul_reg;
 
 Wallace12x12 Wallace12x12_3 (
     .clk        (clk          ),
     .rst        (rst          ),
-    .x_in       (Fou1_reg       ),//Q.12
-    .y_in       (Fou_bcos_reg    ),//Q.12
-    .result_out (Fif1_wire            )//Q.24
+    .x_in       (Fif_sft_reg       ),//Q.12
+    .y_in       (Fif_bcos_reg    ),//Q.12
+    .result_out (Six_mul_wire            )//Q.24
 );
 
 always @(posedge clk) begin
     if (rst) begin
-        Fif1_reg <= 0;
+        Six_mul_reg <= 0;
     end else begin
-        Fif1_reg <= Fif1_wire[23:12];
+        Six_mul_reg <= Six_mul_wire[23:12];
     end
 end
 
-assign y = {sign_pipe[2],Fif1_reg};
-
-
-reg [5:0]finish;
+reg Six_sign_reg;
 always @(posedge clk) begin
     if (rst) begin
-        finish[0] <= 0;
-        finish[1] <= 0;
-        finish[2] <= 0;
-        finish[3] <= 0;
-        finish[4] <= 0;
-        finish[5] <= 0;
+        Six_sign_reg <= 0;
     end else begin
-        finish[0] <= init_end;
-        finish[1] <= finish[0];
-        finish[2] <= finish[1];
-        finish[3] <= finish[2];
-        finish[4] <= finish[3];
-        finish[5] <= finish[4];
+        Six_sign_reg <= Fif_sign_reg;
+    end
+end
+
+reg Six_end_reg;
+reg Sev_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        Six_end_reg <= 0;
+        Sev_end_reg <= 0;
+    end else begin
+        Six_end_reg <= Fif_end_reg;
+        Sev_end_reg <= Six_end_reg;
     end
 end
 
 
-endmodule
+assign y = {Six_sign_reg,Six_mul_reg};
 
+endmodule
 
 
 module 	FullAdder(a, b, cin, sum, cout);
@@ -262,6 +321,7 @@ assign	sum = a ^ b ^ cin;
 assign 	cout = (a & b) | (a & cin) | (b & cin);
 
 endmodule
+
 
 module HalfAdder(a, b, sum, cout);
 
@@ -1583,9 +1643,8 @@ end
 endmodule
 
 
-
-
 module DivRom (
+    input wire [1:0]  sel,
     input wire [10:0] in,
     output wire [3:0] sft,
     output wire [11:0] div//输出12位小数，第一位肯定是0所以省略掉了
@@ -1593,18 +1652,20 @@ module DivRom (
 
 reg [3:0] shift;
 always @(*) begin
-    casez (in)
-        11'b0000000000?:shift = 4'd0;//输出本身就是小数点后12位小数
-        11'b0000000001?:shift = 4'd1;//输出的是0.0后12位
-        11'b000000001??:shift = 4'd2;
-        11'b00000001???:shift = 4'd3;
-        11'b0000001????:shift = 4'd4;
-        11'b000001?????:shift = 4'd5;
-        11'b00001??????:shift = 4'd6;
-        11'b0001???????:shift = 4'd7;
-        11'b001????????:shift = 4'd8;
-        11'b01?????????:shift = 4'd9;
-        11'b1??????????:shift = 4'd10;
+    casez ({sel,in})
+        13'b000000000000?:shift = 4'd0;//输出本身就是小数点后12位小数
+        13'b000000000001?:shift = 4'd1;//输出的是0.0后12位
+        13'b00000000001??:shift = 4'd2;
+        13'b0000000001???:shift = 4'd3;
+        13'b000000001????:shift = 4'd4;
+        13'b00000001?????:shift = 4'd5;
+        13'b0000001??????:shift = 4'd6;
+        13'b000001???????:shift = 4'd7;
+        13'b00001????????:shift = 4'd8;
+        13'b0001?????????:shift = 4'd9;
+        13'b001??????????:shift = 4'd10;
+        13'b01???????????:shift = 4'd11;
+        13'b1????????????:shift = 4'd12;
     endcase
 end
 
@@ -1614,14 +1675,14 @@ reg [11:0] div_out;
 always @(*) begin
 case(in)
 0    : div_out = 12'd0;
-1    : div_out = 12'd4095;
-2    : div_out = 12'd4095;
+1    : div_out = 12'd4095;//2^12
+2    : div_out = 12'd4095;//2^13
 3    : div_out = 12'd2731;
-4    : div_out = 12'd4095;
+4    : div_out = 12'd4095;//2^14
 5    : div_out = 12'd3277;
 6    : div_out = 12'd2731;
 7    : div_out = 12'd2341;
-8    : div_out = 12'd4095;
+8    : div_out = 12'd4095;//2^15
 9    : div_out = 12'd3641;
 10   : div_out = 12'd3277;
 11   : div_out = 12'd2979;
@@ -1629,7 +1690,7 @@ case(in)
 13   : div_out = 12'd2521;
 14   : div_out = 12'd2341;
 15   : div_out = 12'd2185;
-16   : div_out = 12'd4095;
+16   : div_out = 12'd4095;//2^16
 17   : div_out = 12'd3855;
 18   : div_out = 12'd3641;
 19   : div_out = 12'd3449;
@@ -1645,7 +1706,7 @@ case(in)
 29   : div_out = 12'd2260;
 30   : div_out = 12'd2185;
 31   : div_out = 12'd2114;
-32   : div_out = 12'd4095;
+32   : div_out = 12'd4095;//2^17
 33   : div_out = 12'd3972;
 34   : div_out = 12'd3855;
 35   : div_out = 12'd3745;
@@ -1677,7 +1738,7 @@ case(in)
 61   : div_out = 12'd2149;
 62   : div_out = 12'd2114;
 63   : div_out = 12'd2081;
-64   : div_out = 12'd4095;
+64   : div_out = 12'd4095;//2^18
 65   : div_out = 12'd4033;
 66   : div_out = 12'd3972;
 67   : div_out = 12'd3913;
@@ -1741,7 +1802,7 @@ case(in)
 125  : div_out = 12'd2097;
 126  : div_out = 12'd2081;
 127  : div_out = 12'd2064;
-128  : div_out = 12'd4095;
+128  : div_out = 12'd4095;//2^19
 129  : div_out = 12'd4064;
 130  : div_out = 12'd4033;
 131  : div_out = 12'd4002;
@@ -1869,7 +1930,7 @@ case(in)
 253  : div_out = 12'd2072;
 254  : div_out = 12'd2064;
 255  : div_out = 12'd2056;
-256  : div_out = 12'd4095;
+256  : div_out = 12'd4095;//2^20
 257  : div_out = 12'd4080;
 258  : div_out = 12'd4064;
 259  : div_out = 12'd4049;
@@ -2125,7 +2186,7 @@ case(in)
 509  : div_out = 12'd2060;
 510  : div_out = 12'd2056;
 511  : div_out = 12'd2052;
-512  : div_out = 12'd4095;
+512  : div_out = 12'd4095;//2^21
 513  : div_out = 12'd4088;
 514  : div_out = 12'd4080;
 515  : div_out = 12'd4072;
@@ -2637,7 +2698,7 @@ case(in)
 1021 : div_out = 12'd2054;
 1022 : div_out = 12'd2052;
 1023 : div_out = 12'd2050;
-1024 : div_out = 12'd4095;
+1024 : div_out = 12'd4095;//2^22
 1025 : div_out = 12'd4092;
 1026 : div_out = 12'd4088;
 1027 : div_out = 12'd4084;
