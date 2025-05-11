@@ -85,9 +85,9 @@ int main(int argc, char *argv[]) {
     d = rand() % 4096;
     // d = 1383;
     give_e(d);
-    data_test(1000);
+    data_test(100);
 
-    cycle(7);
+    cycle(6);
     // for(int i = 0; i < 1; i++) {
     //     cycle(1);
     //     // a = rand() % 4096;a=966, b=2153, c=2163, d=1383

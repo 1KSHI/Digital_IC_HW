@@ -34,7 +34,7 @@ end
 //(a+d)  
 //=========================== cycle 1 ============================
 wire [12:0] Fir_add_wire;
-reg  [10:0] Fir_add_reg;
+reg  [12:0] Fir_add_reg;
 
 wire [11:0] Sec_rom_wire;
 reg  [11:0] Sec_rom_reg;//cos c>>12
@@ -67,23 +67,15 @@ always @(posedge clk) begin
     end
 end
 
-reg [1:0] sftadd1;
-reg [1:0] sftsel;
+
+
 
 always @(posedge clk) begin
-    if (Fir_add_wire[12]) begin
-        Fir_add_reg <= Fir_add_wire[12:2];
-        sftsel <= 2'b10;
+    if (rst) begin
+        Fir_add_reg <= 0;
     end
-    else begin
-        if (Fir_add_wire[11]) begin
-            Fir_add_reg <= Fir_add_wire[11:1];
-            sftsel <= 2'b01;
-        end
-        else begin
-            Fir_add_reg <= Fir_add_wire[10:0];
-            sftsel <= 2'b00;
-        end
+    else  begin
+        Fir_add_reg <= Fir_add_wire;
     end
 end//a+d得到结果
 
@@ -115,9 +107,26 @@ reg  [3:0]  Sec_sft_reg;
 
 reg  [11:0] Sec_a_reg;//a
 
+reg [10:0] add_in;
+reg [1:0] sftsel;
+always @(*)begin
+    if (Fir_add_reg[12]) begin
+        add_in = Fir_add_reg[12:2];
+        sftsel = 2'b10;
+    end
+    else if (Fir_add_reg[11]) begin
+        add_in = Fir_add_reg[11:1];
+        sftsel = 2'b01;
+    end
+    else begin
+        add_in = Fir_add_reg[10:0];
+        sftsel = 2'b00;
+    end
+end
+
 DivRom DivRom(
     .sel(sftsel),
-    .in  (Fir_add_reg        ),
+    .in  (add_in        ),
     .sft (Sec_sft_wire       ),//Q1.12
     .div (Sec_div_wire            )
 );
@@ -165,7 +174,7 @@ end
 //a * 1/(a+d)  //b*cos c>>12
 //=========================== cycle 3 4 ============================//两周期
 wire [23:0]  Thi_muldiv_wire;
-reg  [23:0]  Thi_muldiv_reg;
+reg  [11:0]  Thi_muldiv_reg;
 
 reg  [3:0]   Thi_sft_reg;
 reg  [3:0]   Fou_sft_reg;
@@ -192,15 +201,25 @@ Wallace12x12 Wallace12x12_1 (
 
 always @(posedge clk) begin
     if (rst) begin
-        Thi_muldiv_reg <= 0;
         Thi_sft_reg <= 0;
-        Fou_sft_reg <= 0;
         Thi_bcos_reg <= 0;
     end else begin
         Thi_sft_reg <= Sec_sft_reg;
-        Fou_sft_reg <= Thi_sft_reg;
-        Thi_muldiv_reg <= Thi_muldiv_wire;
         Thi_bcos_reg <= Thi_bcos_wire[23:12];
+    end
+end
+
+
+wire [23:0] shift_wire;
+assign shift_wire = Thi_muldiv_wire>>Thi_sft_reg;
+
+reg [11:0] Fif_bcos_reg;//(b*cos c)>>12
+
+always @(posedge clk) begin
+    if (rst) begin
+        Thi_muldiv_reg <= 0;
+    end else begin
+        Thi_muldiv_reg <= shift_wire[11:0];
     end
 end
 
@@ -230,25 +249,22 @@ end
 
 //a * 1/(a+d) >> sft
 //=========================== cycle 5 ============================
-reg [11:0]  Fif_sft_reg;
-wire [23:0] shift_wire;
-assign shift_wire = Thi_muldiv_reg>>Fou_sft_reg;
+wire [23:0] Fif_mul_wire;
+reg [11:0]  Fif_mul_reg;
 
-reg [11:0] Fif_bcos_reg;//(b*cos c)>>12
-
-always @(posedge clk) begin
-    if (rst) begin
-        Fif_sft_reg <= 0;
-    end else begin
-        Fif_sft_reg <= shift_wire[11:0];
-    end
-end
+Wallace12x12 Wallace12x12_3 (
+    .clk        (clk          ),
+    .rst        (rst          ),
+    .x_in       (Thi_muldiv_reg       ),//Q.12
+    .y_in       (Thi_bcos_reg    ),//Q.12
+    .result_out (Fif_mul_wire            )//Q.24
+);
 
 always @(posedge clk) begin
     if (rst) begin
-        Fif_bcos_reg <= 0;
+        Fif_mul_reg <= 0;
     end else begin
-        Fif_bcos_reg <= Thi_bcos_reg;
+        Fif_mul_reg <= Fif_mul_wire[23:12];
     end
 end
 
@@ -260,61 +276,25 @@ always @(posedge clk) begin
         Fif_sign_reg <= Fou_sign_reg;
     end
 end
+
 reg Fif_end_reg;
+reg Six_end_reg;
 always @(posedge clk) begin
     if (rst) begin
         Fif_end_reg <= 0;
+        Six_end_reg <= 0;
     end else begin
         Fif_end_reg <= Fou_end_reg;
-    end
-end
-//=========================== cycle 6 ============================
-wire [23:0] Six_mul_wire;
-reg [11:0]  Six_mul_reg;
-
-Wallace12x12 Wallace12x12_3 (
-    .clk        (clk          ),
-    .rst        (rst          ),
-    .x_in       (Fif_sft_reg       ),//Q.12
-    .y_in       (Fif_bcos_reg    ),//Q.12
-    .result_out (Six_mul_wire            )//Q.24
-);
-
-always @(posedge clk) begin
-    if (rst) begin
-        Six_mul_reg <= 0;
-    end else begin
-        Six_mul_reg <= Six_mul_wire[23:12];
-    end
-end
-
-reg Six_sign_reg;
-always @(posedge clk) begin
-    if (rst) begin
-        Six_sign_reg <= 0;
-    end else begin
-        Six_sign_reg <= Fif_sign_reg;
-    end
-end
-
-reg Six_end_reg;
-reg Sev_end_reg;
-always @(posedge clk) begin
-    if (rst) begin
-        Six_end_reg <= 0;
-        Sev_end_reg <= 0;
-    end else begin
         Six_end_reg <= Fif_end_reg;
-        Sev_end_reg <= Six_end_reg;
     end
 end
 
 
-assign y = {Six_sign_reg,Six_mul_reg};
+assign y = {Fif_sign_reg,Fif_mul_reg};
 
 `ifdef SIMULATION
 always @(posedge clk)begin
-    if( Sev_end_reg == 1'b1)begin
+    if( Six_end_reg == 1'b1)begin
         check_finsih({19'b0,y});
     end
 end
