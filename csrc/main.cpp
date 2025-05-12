@@ -81,7 +81,7 @@ void data_test(int num){
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
-    // srand(42);
+    srand(42);
     d = rand() % 4096;
     // d = 1383;
     give_e(d);

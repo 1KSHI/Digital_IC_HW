@@ -81,6 +81,60 @@ always @(posedge clk) begin
     end
 end
 
+//=========================== cycle 1.5 ============================
+reg [10:0] div_in;
+reg [1:0] sftsel;
+
+always @(posedge clk)begin
+    if (Fir_add_reg[12]) begin
+        div_in <= Fir_add_reg[12:2];
+        sftsel <= 2'b10;
+    end
+    else if (Fir_add_reg[11]) begin
+        div_in <= Fir_add_reg[11:1];
+        sftsel <= 2'b01;
+    end
+    else begin
+        div_in <= Fir_add_reg[10:0];
+        sftsel <= 2'b00;
+    end
+end
+
+reg [11:0] temp_b_reg;
+reg [11:0] temp_a_reg;
+reg [11:0] temp_rom_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        temp_b_reg <= 0;
+        temp_a_reg <= 0;
+        temp_rom_reg <= 0;
+
+    end else begin
+        temp_b_reg <= Fir_b_reg;
+        temp_a_reg <= Fir_a_reg;
+        temp_rom_reg <= Sec_rom_reg;
+    end
+end
+
+reg temp_sign_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        temp_sign_reg <= 0;
+    end else begin
+        temp_sign_reg <= Fir_sign_reg;
+    end
+end
+
+reg temp_end_reg;
+always @(posedge clk) begin
+    if (rst) begin
+        temp_end_reg <= 0;
+    end else begin
+        temp_end_reg <= Fir_end_reg;
+    end
+end
+
+
 //1/(a+d)    
 //=========================== cycle 2 ============================
 wire [11:0] Sec_div_wire;
@@ -91,22 +145,7 @@ reg  [3:0]  Sec_sft_reg;
 
 reg  [11:0] Sec_a_reg;//a
 
-reg [10:0] div_in;
-reg [1:0] sftsel;
-always @(*)begin
-    if (Fir_add_reg[12]) begin
-        div_in = Fir_add_reg[12:2];
-        sftsel = 2'b10;
-    end
-    else if (Fir_add_reg[11]) begin
-        div_in = Fir_add_reg[11:1];
-        sftsel = 2'b01;
-    end
-    else begin
-        div_in = Fir_add_reg[10:0];
-        sftsel = 2'b00;
-    end
-end
+
 
 DivRom DivRom(
     .sel (sftsel        ),
@@ -124,7 +163,7 @@ always @(posedge clk) begin
     end else begin
         Sec_div_reg <= Sec_div_wire;
         Sec_sft_reg <= Sec_sft_wire;
-        Sec_a_reg <= Fir_a_reg;
+        Sec_a_reg <= temp_a_reg;
     end
 end
 
@@ -133,7 +172,7 @@ always @(posedge clk) begin
     if (rst) begin
         Sec_b_reg <= 0;
     end else begin
-        Sec_b_reg <= Fir_b_reg;
+        Sec_b_reg <= temp_b_reg;
     end
 end
 
@@ -142,7 +181,7 @@ always @(posedge clk) begin
     if (rst) begin
         Sec_sign_reg <= 0;
     end else begin
-        Sec_sign_reg <= Fir_sign_reg;
+        Sec_sign_reg <= temp_sign_reg;
     end
 end
 
@@ -151,7 +190,7 @@ always @(posedge clk) begin
     if (rst) begin
         Sec_end_reg <= 0;
     end else begin
-        Sec_end_reg <= Fir_end_reg;
+        Sec_end_reg <= temp_end_reg;
     end
 end
 
@@ -179,7 +218,7 @@ Wallace12x12 Wallace12x12_1 (
     .clk        (clk                      ),
     .rst        (rst                      ),
     .x_in       (Sec_b_reg                ),
-    .y_in       ({Sec_rom_reg[10:0],1'b0} ),//Q.12
+    .y_in       ({temp_rom_reg[10:0],1'b0} ),//Q.12
     .result_out (Thi_bcos_wire            )
 );
 
