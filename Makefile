@@ -1,6 +1,6 @@
 # 0.verilator export：
 VERILATOR = $(VERILATOR_ROOT)/bin/verilator
-
+TCL_SCRIPT = $(PROJ_PATH)/$(TOP_MODULE).tcl
 # 1.files info:
 PROJ_PATH = $(shell pwd)
 VSRCS += $(shell find $(abspath ./vsrc) -name "*.v" -not -path "$(abspath ./vsrc/tb)/*")
@@ -74,7 +74,7 @@ yos:
 
 # vivado simulation
 vivado:
-	$(VIVADO) -mode batch -source $(TCL_SCRIPT)
+	$(VIVADO_HOME) -mode batch -source $(TCL_SCRIPT)
 
 
 init:

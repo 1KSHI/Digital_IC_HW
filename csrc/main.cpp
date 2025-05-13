@@ -39,13 +39,38 @@ void cor_y(int a,int b, int c, int d){
     #if PRINTF_DAT 
     printf("error=%.15f \n", error);
     #endif
+    
     if(error < pow(2, -10)){
         success++;
+        #if PRINTF_DAT 
         printf("pass\n");
+        #endif
     }else{
+        //#if PRINTF_DAT 
         printf("fail\n");
+        printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        printf("y_true=%.15f  ", y_true);
+        printf("y=%.15f  ", y_result/pow(2,12));
+        
+        printf("error=%.15f \n", error);
+        printf("count=%d\n", count);
+        
+        //#endif
     }
+    if(count == 4087){
+        printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        printf("y_true=%.15f  ", y_true);
+        printf("y=%.15f  ", y_result/pow(2,12));
+        
+        printf("error=%.15f \n", error);
+        printf("count=%d\n", count);
+    }
+
+    //printf("y=%x  ", top->y);
+    
     count++;
+
+    
 }
 
 void give_e(int e){
@@ -77,17 +102,55 @@ void data_test(int num){
     }
 }
 
+void fix_test(){
+    a = 1305;
+    b = 1897;
+    c = 2551;
+    top->a=a;
+    top->b=b;
+    top->c=c;
+    a_mem[0] = a;
+    b_mem[0] = b;
+    c_mem[0] = c;
+    cycle(1);
+    a = 69;
+    b = 1411;
+    c = 2993;
+    top->a=a;
+    top->b=b;
+    top->c=c;
+    a_mem[1] = a;
+    b_mem[1] = b;
+    c_mem[1] = c;
+    cycle(1);
+    a = 1155;
+    b = 1546;
+    c = 3258;
+    top->a=a;
+    top->b=b;
+    top->c=c;
+    a_mem[2] = a;
+    b_mem[2] = b;
+    c_mem[2] = c;
+    cycle(1);
+    //printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
+}
+
 
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
-    srand(42);
+    srand(44);
     d = rand() % 4096;
     // d = 1383;
     give_e(d);
-    data_test(100);
+    //fix_test();
+    //data_test(1);
+    
+    data_test(4000);
 
-    cycle(6);
+    cycle(8);
+    printf("total=%d, success=%d, rate=%.2f%%\n", count, success, (float)success/count*100);
     // for(int i = 0; i < 1; i++) {
     //     cycle(1);
     //     // a = rand() % 4096;a=966, b=2153, c=2163, d=1383

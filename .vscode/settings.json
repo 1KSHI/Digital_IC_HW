@@ -1,7 +1,7 @@
 {
-    "verilog.linting.linter": "verilator",
-	"digital-ide.function.lsp.linter.verilog.diagnostor": "verilator",
-	"digital-ide.function.lsp.linter.systemverilog.diagnostor": "verilator",
+    "verilog.linting.linter": "xvlog",
+	"digital-ide.function.lsp.linter.verilog.diagnostor": "vivado",
+	"digital-ide.function.lsp.linter.systemverilog.diagnostor": "vivado",
 	"files.associations": {
 		"regex.h": "c",
 		"include.h": "c",

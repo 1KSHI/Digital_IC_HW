@@ -1,0 +1,372 @@
+#-----------------------------------------------------------
+# Vivado v2023.2 (64-bit)
+# SW Build 4029153 on Fri Oct 13 20:13:54 MDT 2023
+# IP Build 4028589 on Sat Oct 14 00:45:43 MDT 2023
+# SharedData Build 4025554 on Tue Oct 10 17:18:54 MDT 2023
+# Start of session at: Tue May 13 13:36:30 2025
+# Process ID: 56116
+# Current directory: /home/k-shi/KSHI/IC_proj/IC_HW_4cy
+# Command line: vivado -mode batch -source /home/k-shi/KSHI/IC_proj/IC_HW_4cy/top.tcl
+# Log file: /home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado.log
+# Journal file: /home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado.jou
+# Running On: kshi-virtual-machine, OS: Linux, CPU Frequency: 2495.273 MHz, CPU Physical cores: 8, Host memory: 8278 MB
+#-----------------------------------------------------------
+source /home/k-shi/KSHI/IC_proj/IC_HW_4cy/top.tcl
+# set PROJECT_NAME "rtl_simulation"
+# set TOP_MODULE_SRC "top"
+# set TOP_MODULE_SIM "tb_top"
+# set SRC_DIR "./vsrc"
+# set SIM_DIR "./vsrc/tb"
+# set REPORT_DIR "./reports"
+# set PROJECT_DIR "./vivado_sim"
+# set FPGA_PART "xc7z020clg484-1"
+# set SIM_RESULT "simulation_results.log"
+# set SRC_FILELIST [glob $SRC_DIR/*.v]
+# set SIM_FILELIST [glob $SIM_DIR/*.v]
+# set CLEAN_FILELIST {*.backup.jou *.backup.log *.backup.str}
+# foreach cleanfile $CLEAN_FILELIST {
+#     set files [glob -nocomplain ./$cleanfile]
+#     if {[llength $files] == 0} {
+#         puts "No files found for pattern: $cleanfile"
+#     } else {
+#         foreach file $files {
+#             file delete -force $file
+#             puts "Deleted file: $file"
+#         }
+#     }
+# }
+Deleted file: ./vivado_55660.backup.jou
+Deleted file: ./vivado_55660.backup.log
+No files found for pattern: *.backup.str
+# set SIMWV_EXTLIST {*.wdb *.vcd *.wcfg *.bmp}
+# foreach fileEXT $SIMWV_EXTLIST {
+#     set files [glob -nocomplain $REPORT_DIR/$fileEXT]
+#     if {[llength $files] == 0} {
+#         puts "No files found for pattern: $fileEXT"
+#     } else {
+#         foreach file $files {
+#             file delete -force $file
+#             puts "Deleted file: $file"
+#         }
+#     }
+# }
+No files found for pattern: *.wdb
+No files found for pattern: *.vcd
+Deleted file: ./reports/sim_waveform_behav.wcfg
+No files found for pattern: *.bmp
+# set DIRLIST [list $REPORT_DIR $SRC_DIR $SIM_DIR]
+# foreach dir $DIRLIST {
+#     if {$dir eq ""} {
+#         puts "## Error: One of the directory variables is empty. Aborting..."
+#         exit
+#     }
+#     if {![file isdirectory $dir]} {
+#         if {[catch {file mkdir $dir} result]} {
+#             puts "## Error: Failed to create directory $dir. Reason: $result"
+#         } else {
+#             puts "## Directory $dir created successfully."
+#         }
+#     }
+# }
+# create_project -force $PROJECT_NAME $PROJECT_DIR -part $FPGA_PART
+# foreach file $SRC_FILELIST {
+#     add_files -fileset sources_1 $file
+#     add_files -fileset sim_1 $file
+# }
+# foreach file $SIM_FILELIST {
+#     add_files -fileset sim_1 $file
+# }
+# update_compile_order -fileset sources_1
+# update_compile_order -fileset sim_1
+# set_property top $TOP_MODULE_SRC [get_filesets sources_1]
+# set_property top $TOP_MODULE_SIM [get_filesets sim_1]
+# launch_simulation
+Command: launch_simulation 
+INFO: [Vivado 12-12493] Simulation top is 'tb_top'
+INFO: [Vivado 12-5682] Launching behavioral simulation in '/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado_sim/rtl_simulation.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-72] Using boost library from '/opt/Xilinx/Vivado/2023.2/tps/boost_1_72_0'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_top' in fileset 'sim_1'...
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in '/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado_sim/rtl_simulation.sim/sim_1/behav/xsim'
+xvlog --incr --relax -prj tb_top_vlog.prj
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Adder12.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Adder12
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/DivRom.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module DivRom
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module FullAdder
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module HalfAdder
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Rom.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Rom
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Wallace12x12.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module Wallace12x12
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/top.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module top
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/tb/tb_top.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module tb_top
+INFO: [VRFC 10-2263] Analyzing Verilog file "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado_sim/rtl_simulation.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module glbl
+Waiting for jobs to finish...
+No pending jobs, compilation finished.
+INFO: [USF-XSim-69] 'compile' step finished in '1' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in '/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado_sim/rtl_simulation.sim/sim_1/behav/xsim'
+xelab --incr --debug typical --relax --mt 8 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_top_behav xil_defaultlib.tb_top xil_defaultlib.glbl -log elaborate.log
+Vivado Simulator v2023.2
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+Running: /opt/Xilinx/Vivado/2023.2/bin/unwrapped/lnx64.o/xelab --incr --debug typical --relax --mt 8 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_top_behav xil_defaultlib.tb_top xil_defaultlib.glbl -log elaborate.log 
+Using 8 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/top.v" Line 5. Module top doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Adder12.v" Line 1. Module Adder12 doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Rom.v" Line 1. Module Rom doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/DivRom.v" Line 2. Module DivRom doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/Wallace12x12.v" Line 1. Module Wallace12x12 doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/HalfAdder.v" Line 1. Module HalfAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+WARNING: [XSIM 43-4099] "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/FullAdder.v" Line 1. Module FullAdder doesn't have a timescale but at least one module in design has a timescale.
+INFO: [Common 17-14] Message 'XSIM 43-4099' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.Adder12
+Compiling module xil_defaultlib.Rom
+Compiling module xil_defaultlib.DivRom
+Compiling module xil_defaultlib.HalfAdder
+Compiling module xil_defaultlib.FullAdder
+Compiling module xil_defaultlib.Wallace12x12
+Compiling module xil_defaultlib.top
+Compiling module xil_defaultlib.tb_top
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_top_behav
+INFO: [USF-XSim-69] 'elaborate' step finished in '2' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in '/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vivado_sim/rtl_simulation.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_top_behav -key {Behavioral:sim_1:Functional:tb_top} -tclbatch {tb_top.tcl} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Time resolution is 1 ps
+source tb_top.tcl
+## current_wave_config
+Time: 0 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 30000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 90000 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 100000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 120000 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 130000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 140000 | a: 2029 | b: 1932 | c: 2553 | e: 0 | y: 0.000000
+Time: 150000 | a: 2029 | b: 1932 | c: 2553 | e: 0 | y: 0.000000 | y_true: -0.000013
+Time: 150000 | a: 1222 | b: 1221 | c: 682 | e: 0 | y: 0.000000
+Time: 160000 | a: 1222 | b: 1221 | c: 682 | e: 0 | y: 0.000000 | y_true: 0.000111
+Time: 160000 | a: 2021 | b: 631 | c: 1554 | e: 0 | y: 0.000000
+Time: 170000 | a: 2021 | b: 631 | c: 1554 | e: 0 | y: 0.000000 | y_true: -0.000122
+Time: 170000 | a: 2959 | b: 2546 | c: 1742 | e: 0 | y: 0.000000
+Time: 180000 | a: 2959 | b: 2546 | c: 1742 | e: 0 | y: 0.000000 | y_true: -0.000078
+Time: 180000 | a: 2792 | b: 3781 | c: 2396 | e: 0 | y: 0.000000
+Time: 190000 | a: 2792 | b: 3781 | c: 2396 | e: 0 | y: 0.000000 | y_true: -0.000087
+Time: 190000 | a: 2237 | b: 2093 | c: 1637 | e: 0 | y: 0.000000
+Time: 200000 | a: 2237 | b: 2093 | c: 1637 | e: 0 | y: 0.000000 | y_true: -0.000027
+Time: 200000 | a: 611 | b: 1802 | c: 640 | e: 0 | y: 0.000000
+Time: 210000 | a: 611 | b: 1802 | c: 640 | e: 0 | y: 0.000000 | y_true: 0.000717
+Time: 210000 | a: 288 | b: 1450 | c: 3229 | e: 0 | y: 0.000000
+Time: 220000 | a: 288 | b: 1450 | c: 3229 | e: 0 | y: 1.137695 | y_true: 0.000758
+Time: 220000 | a: 3734 | b: 2067 | c: 2061 | e: 0 | y: 0.000000
+Time: 230000 | a: 3734 | b: 2067 | c: 2061 | e: 0 | y: 0.043457 | y_true: -0.000086
+Time: 230000 | a: 1619 | b: 3435 | c: 2773 | e: 0 | y: 0.000000
+Time: 240000 | a: 1619 | b: 3435 | c: 2773 | e: 0 | y: 1.045410 | y_true: -0.000198
+Time: 240000 | a: 2562 | b: 3758 | c: 2333 | e: 0 | y: 0.000000
+Time: 250000 | a: 2562 | b: 3758 | c: 2333 | e: 0 | y: 1.277832 | y_true: -0.000206
+Time: 250000 | a: 719 | b: 2339 | c: 1290 | e: 0 | y: 0.000000
+Time: 260000 | a: 719 | b: 2339 | c: 1290 | e: 0 | y: 1.386719 | y_true: -0.000316
+Time: 260000 | a: 2762 | b: 3132 | c: 3570 | e: 0 | y: 0.000000
+Time: 270000 | a: 2762 | b: 3132 | c: 3570 | e: 0 | y: 1.178467 | y_true: 0.000239
+Time: 270000 | a: 394 | b: 833 | c: 1240 | e: 0 | y: 0.000000
+Time: 280000 | a: 394 | b: 833 | c: 1240 | e: 0 | y: 0.041748 | y_true: -0.000102
+Time: 280000 | a: 888 | b: 649 | c: 3563 | e: 0 | y: 0.000000
+Time: 290000 | a: 888 | b: 649 | c: 3563 | e: 0 | y: 0.007568 | y_true: 0.000533
+Time: 290000 | a: 1462 | b: 2502 | c: 942 | e: 0 | y: 0.000000
+Time: 300000 | a: 1462 | b: 2502 | c: 942 | e: 0 | y: 1.281738 | y_true: 0.000004
+Time: 300000 | a: 700 | b: 3370 | c: 2571 | e: 0 | y: 0.000000
+Time: 310000 | a: 700 | b: 3370 | c: 2571 | e: 0 | y: 1.131592 | y_true: -0.000906
+Time: 310000 | a: 3697 | b: 389 | c: 1359 | e: 0 | y: 0.000000
+Time: 320000 | a: 3697 | b: 389 | c: 1359 | e: 0 | y: 1.386475 | y_true: -0.000014
+Time: 320000 | a: 59 | b: 826 | c: 638 | e: 0 | y: 0.000000
+Time: 330000 | a: 59 | b: 826 | c: 638 | e: 0 | y: 1.044189 | y_true: 0.007059
+Time: 330000 | a: 2837 | b: 3057 | c: 3033 | e: 0 | y: 0.000000
+Time: 340000 | a: 2837 | b: 3057 | c: 3033 | e: 0 | y: 0.256104 | y_true: -0.000008
+$finish called at time : 440 ns : File "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/tb/tb_top.v" Line 80
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_top_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1000ns
+launch_simulation: Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 1391.113 ; gain = 5.270 ; free physical = 303 ; free virtual = 4150
+# if {![file isdirectory $REPORT_DIR]} {
+#     file mkdir $REPORT_DIR
+#     puts "Created directory: $REPORT_DIR"
+# }
+# open_vcd $REPORT_DIR/sim_waveform_behav.vcd
+ERROR: Could not open VCD file ./reports/sim_waveform_behav.vcd for writing.
+# log_vcd /$TOP_MODULE_SIM
+WARNING: [Simtcl 6-216] No such HDL Object /tb_top
+# restart
+INFO: [Wavedata 42-604] Simulation restarted
+ERROR: Could not open VCD file ./reports/sim_waveform_behav.vcd for writing.
+# run all
+Time: 0 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 30000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 90000 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 100000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 120000 | a: 0 | b: 0 | c: 0 | e: 0 | y: 0.000000
+Time: 130000 | a: 0 | b: 0 | c: 0 | e: 1 | y: 0.000000
+Time: 140000 | a: 2029 | b: 1932 | c: 2553 | e: 0 | y: 0.000000
+Time: 150000 | a: 2029 | b: 1932 | c: 2553 | e: 0 | y: 0.000000 | y_true: -0.000013
+Time: 150000 | a: 1222 | b: 1221 | c: 682 | e: 0 | y: 0.000000
+Time: 160000 | a: 1222 | b: 1221 | c: 682 | e: 0 | y: 0.000000 | y_true: 0.000111
+Time: 160000 | a: 2021 | b: 631 | c: 1554 | e: 0 | y: 0.000000
+Time: 170000 | a: 2021 | b: 631 | c: 1554 | e: 0 | y: 0.000000 | y_true: -0.000122
+Time: 170000 | a: 2959 | b: 2546 | c: 1742 | e: 0 | y: 0.000000
+Time: 180000 | a: 2959 | b: 2546 | c: 1742 | e: 0 | y: 0.000000 | y_true: -0.000078
+Time: 180000 | a: 2792 | b: 3781 | c: 2396 | e: 0 | y: 0.000000
+Time: 190000 | a: 2792 | b: 3781 | c: 2396 | e: 0 | y: 0.000000 | y_true: -0.000087
+Time: 190000 | a: 2237 | b: 2093 | c: 1637 | e: 0 | y: 0.000000
+Time: 200000 | a: 2237 | b: 2093 | c: 1637 | e: 0 | y: 0.000000 | y_true: -0.000027
+Time: 200000 | a: 611 | b: 1802 | c: 640 | e: 0 | y: 0.000000
+Time: 210000 | a: 611 | b: 1802 | c: 640 | e: 0 | y: 0.000000 | y_true: 0.000717
+Time: 210000 | a: 288 | b: 1450 | c: 3229 | e: 0 | y: 0.000000
+Time: 220000 | a: 288 | b: 1450 | c: 3229 | e: 0 | y: 1.137695 | y_true: 0.000758
+Time: 220000 | a: 3734 | b: 2067 | c: 2061 | e: 0 | y: 0.000000
+Time: 230000 | a: 3734 | b: 2067 | c: 2061 | e: 0 | y: 0.043457 | y_true: -0.000086
+Time: 230000 | a: 1619 | b: 3435 | c: 2773 | e: 0 | y: 0.000000
+Time: 240000 | a: 1619 | b: 3435 | c: 2773 | e: 0 | y: 1.045410 | y_true: -0.000198
+Time: 240000 | a: 2562 | b: 3758 | c: 2333 | e: 0 | y: 0.000000
+Time: 250000 | a: 2562 | b: 3758 | c: 2333 | e: 0 | y: 1.277832 | y_true: -0.000206
+Time: 250000 | a: 719 | b: 2339 | c: 1290 | e: 0 | y: 0.000000
+Time: 260000 | a: 719 | b: 2339 | c: 1290 | e: 0 | y: 1.386719 | y_true: -0.000316
+Time: 260000 | a: 2762 | b: 3132 | c: 3570 | e: 0 | y: 0.000000
+Time: 270000 | a: 2762 | b: 3132 | c: 3570 | e: 0 | y: 1.178467 | y_true: 0.000239
+Time: 270000 | a: 394 | b: 833 | c: 1240 | e: 0 | y: 0.000000
+Time: 280000 | a: 394 | b: 833 | c: 1240 | e: 0 | y: 0.041748 | y_true: -0.000102
+Time: 280000 | a: 888 | b: 649 | c: 3563 | e: 0 | y: 0.000000
+Time: 290000 | a: 888 | b: 649 | c: 3563 | e: 0 | y: 0.007568 | y_true: 0.000533
+Time: 290000 | a: 1462 | b: 2502 | c: 942 | e: 0 | y: 0.000000
+Time: 300000 | a: 1462 | b: 2502 | c: 942 | e: 0 | y: 1.281738 | y_true: 0.000004
+Time: 300000 | a: 700 | b: 3370 | c: 2571 | e: 0 | y: 0.000000
+Time: 310000 | a: 700 | b: 3370 | c: 2571 | e: 0 | y: 1.131592 | y_true: -0.000906
+Time: 310000 | a: 3697 | b: 389 | c: 1359 | e: 0 | y: 0.000000
+Time: 320000 | a: 3697 | b: 389 | c: 1359 | e: 0 | y: 1.386475 | y_true: -0.000014
+Time: 320000 | a: 59 | b: 826 | c: 638 | e: 0 | y: 0.000000
+Time: 330000 | a: 59 | b: 826 | c: 638 | e: 0 | y: 1.044189 | y_true: 0.007059
+Time: 330000 | a: 2837 | b: 3057 | c: 3033 | e: 0 | y: 0.000000
+Time: 340000 | a: 2837 | b: 3057 | c: 3033 | e: 0 | y: 0.256104 | y_true: -0.000008
+$finish called at time : 440 ns : File "/home/k-shi/KSHI/IC_proj/IC_HW_4cy/vsrc/tb/tb_top.v" Line 80
+# close_vcd
+# save_wave_config $REPORT_DIR/sim_waveform_behav.wcfg
+# stop
+# close_sim
+INFO: [Simtcl 6-16] Simulation closed
+# set sim_log_file "$PROJECT_DIR/${PROJECT_NAME}.sim/sim_1/behav/xsim/simulation_results.log"
+# if {[file exists $sim_log_file]} {
+#     file copy -force $sim_log_file $REPORT_DIR/sim_results_behav.log
+# } else {
+#     puts "Warning: Simulation log file not found at $sim_log_file"
+# }
+Warning: Simulation log file not found at ./vivado_sim/rtl_simulation.sim/sim_1/behav/xsim/simulation_results.log
+# exit
+INFO: [Common 17-206] Exiting Vivado at Tue May 13 13:36:44 2025...
