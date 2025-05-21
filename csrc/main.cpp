@@ -6,11 +6,12 @@ VerilatedVcdC* tfp = NULL;
 Vtop* top;
 #define PI 3.14159265358979323846
 #define PRINTF 1
-#define PRINTF_DAT 0
+#define PRINTF_DAT 1
+#define TEST_NUM 65536
 int count_dpi = 0;
-int a_mem[4096];
-int b_mem[4096];
-int c_mem[4096];
+int a_mem[TEST_NUM];
+int b_mem[TEST_NUM];
+int c_mem[TEST_NUM];
 
 int count = 0;
 int success = 0;
@@ -19,11 +20,14 @@ int a = 2040;
 int b = 795;
 int c = 123;
 int d = 1383;
+
+FILE* output_file; 
+
 void cor_y(int a,int b, int c, int d){
     double y_true = 0;
     y_true = (a*b*cos(2*PI*c/pow(2, 12)))/(a+d)/pow(2, 12);
     #if PRINTF_DAT 
-    printf("y_true=%.15f  ", y_true);
+    
     #endif
 
     float y_result = top->y&0xFFF;
@@ -32,38 +36,41 @@ void cor_y(int a,int b, int c, int d){
         y_result = -y_result;
     }
     #if PRINTF_DAT 
-    printf("y=%.15f  ", y_result/pow(2,12));
+    
     #endif
     double error = 0;
     error = fabs(y_result/pow(2,12) - y_true);
     #if PRINTF_DAT 
-    printf("error=%.15f \n", error);
+    
     #endif
     
     if(error < pow(2, -10)){
         success++;
         #if PRINTF_DAT 
-        printf("pass\n");
+        fprintf(output_file,"*PASS*\n");
+        fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
+        fprintf(output_file,"y_true=%.15f  ", y_true);
+        fprintf(output_file,"error=%.15f \n", error);
+        fprintf(output_file,"-----------------------------------------------\n");
         #endif
     }else{
         //#if PRINTF_DAT 
-        printf("fail\n");
+        printf("*FAIL*\n");
         printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
         printf("y_true=%.15f  ", y_true);
         printf("y=%.15f  ", y_result/pow(2,12));
-        
         printf("error=%.15f \n", error);
         printf("count=%d\n", count);
-        
+        printf("-----------------------------------------------\n");
+
+        fprintf(output_file,"*FAIL*\n");
+        fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        fprintf(output_file,"y_true=%.15f  ", y_true);
+        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
+        fprintf(output_file,"error=%.15f \n", error);
+        fprintf(output_file,"-----------------------------------------------\n");
         //#endif
-    }
-    if(count == 4087){
-        printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
-        printf("y_true=%.15f  ", y_true);
-        printf("y=%.15f  ", y_result/pow(2,12));
-        
-        printf("error=%.15f \n", error);
-        printf("count=%d\n", count);
     }
 
     //printf("y=%x  ", top->y);
@@ -140,44 +147,23 @@ void fix_test(){
 int main(int argc, char *argv[]) {
     sim_init();
     reset(1);
-    srand(44);
+    output_file = fopen("output.txt", "w");
+    if (!output_file) {
+        printf("Error: Unable to open output.txt for writing.\n");
+        return 1;
+    }
+    srand(time(NULL));
     d = rand() % 4096;
-    // d = 1383;
+    // d = 761;
     give_e(d);
     //fix_test();
     //data_test(1);
     
-    data_test(4000);
+    data_test(TEST_NUM);
 
     cycle(8);
     printf("total=%d, success=%d, rate=%.2f%%\n", count, success, (float)success/count*100);
-    // for(int i = 0; i < 1; i++) {
-    //     cycle(1);
-    //     // a = rand() % 4096;a=966, b=2153, c=2163, d=1383
-    //     // b = rand() % 4096;
-    //     // c = rand() % 2046;
-    //     a = 323;
-    //     b = 2153;
-    //     c = 23;
-    //     top->a=a;
-    //     top->b=b;
-    //     top->c=c;
-    //     printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
-    //     cycle(1);
-    //     a = 12;
-    //     b = 334;
-    //     c = 12;
-    //     top->a=a;
-    //     top->b=b;
-    //     top->c=c;
-    //     printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
-    //     cycle(16);
-    //     cor_y(323, 2153, 23, top->d);
-    //     cycle(1);
-    //     cor_y(12, 334, 12, top->d);
-    // }
-    // printf("success=%d, count=%d rate=%d%%\n", success, count, success*100/count);
-    // cycle(11);
+
     sim_exit();
 
     return 0;
