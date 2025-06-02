@@ -104,7 +104,6 @@ void data_test(int num){
         a_mem[i] = a;
         b_mem[i] = b;
         c_mem[i] = c;
-        //printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
         cycle(1);
     }
 }
@@ -146,7 +145,7 @@ void fix_test(){
 
 int main(int argc, char *argv[]) {
     sim_init();
-    reset(1);
+    reset();
     output_file = fopen("output.txt", "w");
     if (!output_file) {
         printf("Error: Unable to open output.txt for writing.\n");
@@ -161,7 +160,7 @@ int main(int argc, char *argv[]) {
     
     data_test(TEST_NUM);
 
-    cycle(8);
+    cycle(9);
     printf("total=%d, success=%d, rate=%.2f%%\n", count, success, (float)success/count*100);
 
     sim_exit();

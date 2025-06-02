@@ -8,7 +8,7 @@
 
 void step_wave();
 void single_cycle();
-void reset(int n);
+void reset();
 void sim_init();
 void sim_exit();
 void cycle(int num);

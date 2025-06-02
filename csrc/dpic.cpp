@@ -11,7 +11,6 @@ extern "C" void check_finsih(int y){
     int a = a_mem[count_dpi];
     int b = b_mem[count_dpi];
     int c = c_mem[count_dpi];
-    //printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
     cor_y(a, b, c, d);
     count_dpi++;
 }

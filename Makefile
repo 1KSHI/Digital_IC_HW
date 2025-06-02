@@ -67,6 +67,9 @@ gdb:com ${DIFFTEST}
 wave:
 	gtkwave dump.vcd
 
+vwave:
+	gtkwave vivado_sim/rtl_simulation.sim/sim_1/behav/xsim/dump.vcd
+
 # yosys simulation
 yos: MODULE ?= exu
 yos:

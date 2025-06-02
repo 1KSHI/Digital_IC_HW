@@ -4,7 +4,7 @@
 extern VerilatedContext* contextp;
 extern VerilatedVcdC* tfp;
 extern Vtop* top;
-#define CONFIG_WAVETRACE 0
+#define CONFIG_WAVETRACE 1
 
 void step_wave(){
   top->eval();
@@ -14,9 +14,9 @@ void step_wave(){
 }
 
 void single_cycle() {
-    top->clk = 0; 
-    step_wave();
     top->clk = 1; 
+    step_wave();
+    top->clk = 0; 
     step_wave();
 }
 
@@ -28,10 +28,20 @@ void cycle(int num) {
 
 
   
-void reset(int n) {
+void reset() {
     top->rst = 1;
-    while (n -- > 0) single_cycle();
+    
+    top->clk = 1; 
+    step_wave();
+    top->clk = 0; 
+    step_wave();
+    top->clk = 1; 
+    step_wave();
+
     top->rst = 0;
+    
+    top->clk = 0; 
+    step_wave();
 }
 
 void sim_init(){
