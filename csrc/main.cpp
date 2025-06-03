@@ -109,9 +109,9 @@ void data_test(int num){
 }
 
 void fix_test(){
-    a = 1305;
-    b = 1897;
-    c = 2551;
+    a = 3303;
+    b = 3948;
+    c = 11;
     top->a=a;
     top->b=b;
     top->c=c;
@@ -119,26 +119,26 @@ void fix_test(){
     b_mem[0] = b;
     c_mem[0] = c;
     cycle(1);
-    a = 69;
-    b = 1411;
-    c = 2993;
-    top->a=a;
-    top->b=b;
-    top->c=c;
-    a_mem[1] = a;
-    b_mem[1] = b;
-    c_mem[1] = c;
-    cycle(1);
-    a = 1155;
-    b = 1546;
-    c = 3258;
-    top->a=a;
-    top->b=b;
-    top->c=c;
-    a_mem[2] = a;
-    b_mem[2] = b;
-    c_mem[2] = c;
-    cycle(1);
+    // a = 69;
+    // b = 1411;
+    // c = 2993;
+    // top->a=a;
+    // top->b=b;
+    // top->c=c;
+    // a_mem[1] = a;
+    // b_mem[1] = b;
+    // c_mem[1] = c;
+    // cycle(1);
+    // a = 1155;
+    // b = 1546;
+    // c = 3258;
+    // top->a=a;
+    // top->b=b;
+    // top->c=c;
+    // a_mem[2] = a;
+    // b_mem[2] = b;
+    // c_mem[2] = c;
+    // cycle(1);
     //printf("a=%d, b=%d, c=%d, d=%d\n", top->a, top->b, top->c, top->d);
 }
 
@@ -153,14 +153,14 @@ int main(int argc, char *argv[]) {
     }
     srand(time(NULL));
     d = rand() % 4096;
-    // d = 761;
+    //d = 3814;
     give_e(d);
     //fix_test();
     //data_test(1);
     
     data_test(TEST_NUM);
 
-    cycle(9);
+    cycle(8);
     printf("total=%d, success=%d, rate=%.2f%%\n", count, success, (float)success/count*100);
 
     sim_exit();

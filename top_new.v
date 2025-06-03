@@ -1,7 +1,3 @@
-
-`ifdef SIMULATION
-import "DPI-C" function void check_finsih(int y);
-`endif
 module top(
     input clk,
     input rst,
@@ -67,32 +63,70 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-//(a+d)
+//=========================== cycle 0 ============================
+reg [11:0] Zeo_a_reg;//a
+reg [11:0] Zeo_b_reg;//b
+reg [11:0] Zeo_c_reg;
+
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Zeo_a_reg <= 0;
+        Zeo_b_reg <= 0;
+        Zeo_c_reg <= 0;
+    end else begin
+        Zeo_a_reg <= a;
+        Zeo_b_reg <= b;
+        Zeo_c_reg <= c;
+    end
+end
+
+reg Zero_end_reg;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Zero_end_reg <= 0;
+    end else begin
+        Zero_end_reg <= init_end;
+    end
+end
+
+//(a+d)  
 //=========================== cycle 1 ============================
+wire [12:0] Fir_add_wire;
+reg  [12:0] Fir_add_reg;
+
 reg [11:0] Fir_a_reg;//a
 reg [11:0] Fir_b_reg;//b
 reg [11:0] Fir_c_reg;
 
+Adder12 Adder12 (
+    .x_in      (Zeo_a_reg           ),
+    .y_in      (d_reg       ),
+    .result_out(Fir_add_wire)
+);
+
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
+        Fir_add_reg <= 0;
         Fir_a_reg <= 0;
         Fir_b_reg <= 0;
         Fir_c_reg <= 0;
     end else begin
-        Fir_a_reg <= a;
-        Fir_b_reg <= b;
-        Fir_c_reg <= c;
+        Fir_add_reg <= Fir_add_wire;
+        Fir_a_reg <= Zeo_a_reg;
+        Fir_b_reg <= Zeo_b_reg;
+        Fir_c_reg <= Zeo_c_reg;
     end
 end
 
-
-wire [12:0] Fir_add_wire;
-
-Adder12 Adder12 (
-    .x_in      (Fir_a_reg           ),
-    .y_in      (d_reg               ),
-    .result_out(Fir_add_wire        )
-);
+reg Fir_end_reg;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Fir_end_reg <= 0;
+    end else begin
+        Fir_end_reg <= Zero_end_reg;
+    end
+end
 
 //=========================== cycle 2 3 4 ============================
 wire Sec_sign_wire;
@@ -112,7 +146,7 @@ CosRom CosRom (
 
 DivRom DivRom (
     .clk          (clk            ),
-    .add_in       (Fir_add_wire   ),
+    .add_in       (Fir_add_reg    ),
     .sft_reg      (Sec_sft_wire   ),
     .div          (Sec_div_wire   )
 );
@@ -161,6 +195,22 @@ always @(posedge clk or posedge rst) begin
         Sec_sign_reg <= Sec_sign_wire;
     end
 end
+
+reg Sec_end_reg;
+reg Thi_end_reg;
+reg Fou_end_reg;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Sec_end_reg <= 0;
+        Thi_end_reg <= 0;
+        Fou_end_reg <= 0;
+    end else begin
+        Sec_end_reg <= Fir_end_reg;
+        Thi_end_reg <= Sec_end_reg;
+        Fou_end_reg <= Thi_end_reg;
+    end
+end
+
 
 
 //a * 1/(a+d)  //b*cos c>>12
@@ -225,6 +275,18 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+reg Fif_end_reg;
+reg Six_end_reg;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Fif_end_reg <= 0;
+        Six_end_reg <= 0;
+    end else begin
+        Fif_end_reg <= Fou_end_reg;
+        Six_end_reg <= Fif_end_reg;
+    end
+end
+
 //a * 1/(a+d) >> sft
 //=========================== cycle 7 8 ============================
 wire [23:0] Sev_mul_wire;
@@ -258,28 +320,21 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
+reg Sev_end_reg;
+reg Eig_end_reg;
+always @(posedge clk or posedge rst) begin
+    if (rst) begin
+        Sev_end_reg <= 0;
+        Eig_end_reg <= 0;
+    end else begin
+        Sev_end_reg <= Six_end_reg;
+        Eig_end_reg <= Sev_end_reg;
+    end
+end
+
 assign y = {Eig_sign_reg,Sev_mul_reg};
 
-`ifdef SIMULATION
-reg [5:0]end_reg;
-always @(posedge clk)begin
-    if(rst) begin
-        end_reg <= 0;
-    end else if(end_reg < 6'd20) begin
-        end_reg <= end_reg + 1;
-    end
-end
-
-always @(posedge clk)begin
-    if( end_reg == 6'd20)begin
-        check_finsih({19'b0,y});
-    end
-end
-`endif
-
 endmodule
-
-
 
 module Adder12(
     input [11:0] x_in,
@@ -311,7 +366,6 @@ assign	cout = a & b;
 
 endmodule
 
-
 module	Wallace12x12 ( 
     input   clk,
     input   rst,
@@ -333,37 +387,37 @@ endgenerate
 
 //============== First Stage ==================================================
 
-wire [4:0] Fir1_S, Fir1_C;
-wire [7:0] Fir2_S, Fir2_C;
-wire [10:0] Fir3_S, Fir3_C;
-wire [11:0] Fir4_S, Fir4_C;
+wire	[11: 0]	Fir1_S, Fir1_C;
+wire	[11: 0]	Fir2_S, Fir2_C;
+wire	[11: 0]	Fir3_S, Fir3_C;
+wire	[11: 0]	Fir4_S, Fir4_C;
 
-FullAdder	fir1fa7 ( pp[0][8],  pp[1][7],  pp[2][6],  Fir1_S[0], Fir1_C[0] );
-FullAdder	fir1fa8 ( pp[0][9],  pp[1][8],  pp[2][7],  Fir1_S[1], Fir1_C[1] );
-FullAdder	fir1fa9 ( pp[0][10], pp[1][9],  pp[2][8],  Fir1_S[2], Fir1_C[2] );
-FullAdder	fir1fa10( pp[0][11], pp[1][10], pp[2][9],  Fir1_S[3], Fir1_C[3] );
-HalfAdder	fir1ha11(            pp[1][11], pp[2][10], Fir1_S[4], Fir1_C[4] );
+FullAdder	fir1fa7 ( pp[0][8],  pp[1][7],  pp[2][6],  Fir1_S[7],  Fir1_C[7]  );
+FullAdder	fir1fa8 ( pp[0][9],  pp[1][8],  pp[2][7],  Fir1_S[8],  Fir1_C[8]  );
+FullAdder	fir1fa9 ( pp[0][10], pp[1][9],  pp[2][8],  Fir1_S[9],  Fir1_C[9]  );
+FullAdder	fir1fa10( pp[0][11], pp[1][10], pp[2][9],  Fir1_S[10], Fir1_C[10] );
+HalfAdder	fir1ha11(            pp[1][11], pp[2][10], Fir1_S[11], Fir1_C[11] );
 
-FullAdder	fir2fa4 ( pp[3][5],  pp[4][4],  pp[5][3],  Fir2_S[0], Fir2_C[0] );
-FullAdder	fir2fa5 ( pp[3][6],  pp[4][5],  pp[5][4],  Fir2_S[1], Fir2_C[1] );
-FullAdder	fir2fa6 ( pp[3][7],  pp[4][6],  pp[5][5],  Fir2_S[2], Fir2_C[2] );
-FullAdder	fir2fa7 ( pp[3][8],  pp[4][7],  pp[5][6],  Fir2_S[3], Fir2_C[3] );
-FullAdder	fir2fa8 ( pp[3][9],  pp[4][8],  pp[5][7],  Fir2_S[4], Fir2_C[4] );
-FullAdder	fir2fa9 ( pp[3][10], pp[4][9],  pp[5][8],  Fir2_S[5], Fir2_C[5] );
-FullAdder	fir2fa10( pp[3][11], pp[4][10], pp[5][9],  Fir2_S[6], Fir2_C[6] );
-HalfAdder	fir2ha11(            pp[4][11], pp[5][10], Fir2_S[7], Fir2_C[7] );
+FullAdder	fir2fa4 ( pp[3][5],  pp[4][4],  pp[5][3],  Fir2_S[4],  Fir2_C[4]  );
+FullAdder	fir2fa5 ( pp[3][6],  pp[4][5],  pp[5][4],  Fir2_S[5],  Fir2_C[5]  );
+FullAdder	fir2fa6 ( pp[3][7],  pp[4][6],  pp[5][5],  Fir2_S[6],  Fir2_C[6]  );
+FullAdder	fir2fa7 ( pp[3][8],  pp[4][7],  pp[5][6],  Fir2_S[7],  Fir2_C[7]  );
+FullAdder	fir2fa8 ( pp[3][9],  pp[4][8],  pp[5][7],  Fir2_S[8],  Fir2_C[8]  );
+FullAdder	fir2fa9 ( pp[3][10], pp[4][9],  pp[5][8],  Fir2_S[9],  Fir2_C[9]  );
+FullAdder	fir2fa10( pp[3][11], pp[4][10], pp[5][9],  Fir2_S[10], Fir2_C[10] );
+HalfAdder	fir2ha11(            pp[4][11], pp[5][10], Fir2_S[11], Fir2_C[11] );
 
-FullAdder	fir3fa1 ( pp[6][2],  pp[7][1],  pp[8][0],  Fir3_S[0],  Fir3_C[0]  );
-FullAdder	fir3fa2 ( pp[6][3],  pp[7][2],  pp[8][1],  Fir3_S[1],  Fir3_C[1]  );
-FullAdder	fir3fa3 ( pp[6][4],  pp[7][3],  pp[8][2],  Fir3_S[2],  Fir3_C[2]  );
-FullAdder	fir3fa4 ( pp[6][5],  pp[7][4],  pp[8][3],  Fir3_S[3],  Fir3_C[3]  );
-FullAdder	fir3fa5 ( pp[6][6],  pp[7][5],  pp[8][4],  Fir3_S[4],  Fir3_C[4]  );
-FullAdder	fir3fa6 ( pp[6][7],  pp[7][6],  pp[8][5],  Fir3_S[5],  Fir3_C[5]  );
-FullAdder	fir3fa7 ( pp[6][8],  pp[7][7],  pp[8][6],  Fir3_S[6],  Fir3_C[6]  );
-FullAdder	fir3fa8 ( pp[6][9],  pp[7][8],  pp[8][7],  Fir3_S[7],  Fir3_C[7]  );
-FullAdder	fir3fa9 ( pp[6][10], pp[7][9],  pp[8][8],  Fir3_S[8],  Fir3_C[8]  );
-FullAdder	fir3fa10( pp[6][11], pp[7][10], pp[8][9],  Fir3_S[9],  Fir3_C[9]  );
-HalfAdder	fir3ha11(            pp[7][11], pp[8][10], Fir3_S[10], Fir3_C[10] );
+FullAdder	fir3fa1 ( pp[6][2],  pp[7][1],  pp[8][0],  Fir3_S[1],  Fir3_C[1]  );
+FullAdder	fir3fa2 ( pp[6][3],  pp[7][2],  pp[8][1],  Fir3_S[2],  Fir3_C[2]  );
+FullAdder	fir3fa3 ( pp[6][4],  pp[7][3],  pp[8][2],  Fir3_S[3],  Fir3_C[3]  );
+FullAdder	fir3fa4 ( pp[6][5],  pp[7][4],  pp[8][3],  Fir3_S[4],  Fir3_C[4]  );
+FullAdder	fir3fa5 ( pp[6][6],  pp[7][5],  pp[8][4],  Fir3_S[5],  Fir3_C[5]  );
+FullAdder	fir3fa6 ( pp[6][7],  pp[7][6],  pp[8][5],  Fir3_S[6],  Fir3_C[6]  );
+FullAdder	fir3fa7 ( pp[6][8],  pp[7][7],  pp[8][6],  Fir3_S[7],  Fir3_C[7]  );
+FullAdder	fir3fa8 ( pp[6][9],  pp[7][8],  pp[8][7],  Fir3_S[8],  Fir3_C[8]  );
+FullAdder	fir3fa9 ( pp[6][10], pp[7][9],  pp[8][8],  Fir3_S[9],  Fir3_C[9]  );
+FullAdder	fir3fa10( pp[6][11], pp[7][10], pp[8][9],  Fir3_S[10], Fir3_C[10] );
+HalfAdder	fir3ha11(            pp[7][11], pp[8][10], Fir3_S[11], Fir3_C[11] );
 
 HalfAdder	fir4ha0 ( pp[9][1],   pp[10][0],              Fir4_S[0],  Fir4_C[0]  );
 FullAdder	fir4fa1 ( pp[9][2],   pp[10][1],  pp[11][0],  Fir4_S[1],  Fir4_C[1]  );
@@ -381,100 +435,100 @@ HalfAdder	fir4ha11(             pp[10][11], pp[11][10], Fir4_S[11], Fir4_C[11] )
 
 //============== Second Stage =================================================
 
-wire	[5:0]	Sec1_S, Sec1_C;
-wire	[11:0]	Sec2_S, Sec2_C;
+wire	[11: 0]	Sec1_S, Sec1_C;
+wire	[13: 0]	Sec2_S, Sec2_C;
 
-FullAdder	sec1fa6 ( Fir1_S[0],  1'b0     ,  Fir2_S[0], Sec1_S[0], Sec1_C[0]  );
-FullAdder	sec1fa7 ( Fir1_S[1],  Fir1_C[0],  Fir2_S[1], Sec1_S[1], Sec1_C[1]  );
-FullAdder	sec1fa8 ( Fir1_S[2],  Fir1_C[1],  Fir2_S[2], Sec1_S[2], Sec1_C[2]  );
-FullAdder	sec1fa9 ( Fir1_S[3],  Fir1_C[2],  Fir2_S[3], Sec1_S[3], Sec1_C[3]  );
-FullAdder	sec1fa10( Fir1_S[4],  Fir1_C[3],  Fir2_S[4], Sec1_S[4], Sec1_C[4]  );
-FullAdder	sec1fa11( pp[2][11],  Fir1_C[4],  Fir2_S[5], Sec1_S[5], Sec1_C[5]  );
+FullAdder	sec1fa6 ( Fir1_S[7],  Fir1_C[6],  Fir2_S[4], Sec1_S[6],  Sec1_C[6]  );
+FullAdder	sec1fa7 ( Fir1_S[8],  Fir1_C[7],  Fir2_S[5], Sec1_S[7],  Sec1_C[7]  );
+FullAdder	sec1fa8 ( Fir1_S[9],  Fir1_C[8],  Fir2_S[6], Sec1_S[8],  Sec1_C[8]  );
+FullAdder	sec1fa9 ( Fir1_S[10], Fir1_C[9],  Fir2_S[7], Sec1_S[9],  Sec1_C[9]  );
+FullAdder	sec1fa10( Fir1_S[11], Fir1_C[10], Fir2_S[8], Sec1_S[10], Sec1_C[10] );
+FullAdder	sec1fa11( pp[2][11],  Fir1_C[11], Fir2_S[9], Sec1_S[11], Sec1_C[11] );
 
-FullAdder	sec2fa2 ( 1'b0     ,  Fir3_S[0],  1'b0     ,  Sec2_S[0],  Sec2_C[0]  );
-FullAdder	sec2fa3 ( Fir2_C[0],  Fir3_S[1],  Fir3_C[0],  Sec2_S[1],  Sec2_C[1]  );
-FullAdder	sec2fa4 ( Fir2_C[1],  Fir3_S[2],  Fir3_C[1],  Sec2_S[2],  Sec2_C[2]  );
-FullAdder	sec2fa5 ( Fir2_C[2],  Fir3_S[3],  Fir3_C[2],  Sec2_S[3],  Sec2_C[3]  );
-FullAdder	sec2fa6 ( Fir2_C[3],  Fir3_S[4],  Fir3_C[3],  Sec2_S[4],  Sec2_C[4]  );
-FullAdder	sec2fa7 ( Fir2_C[4],  Fir3_S[5],  Fir3_C[4],  Sec2_S[5],  Sec2_C[5]  );
-FullAdder	sec2fa8 ( Fir2_C[5],  Fir3_S[6],  Fir3_C[5],  Sec2_S[6],  Sec2_C[6]  );
-FullAdder	sec2fa9 ( Fir2_C[6],  Fir3_S[7],  Fir3_C[6],  Sec2_S[7],  Sec2_C[7]  );
-FullAdder	sec2fa10( Fir2_C[7],  Fir3_S[8],  Fir3_C[7],  Sec2_S[8],  Sec2_C[8]  );
-HalfAdder	sec2ha11(             Fir3_S[9],  Fir3_C[8],  Sec2_S[9],  Sec2_C[9]  );
-HalfAdder	sec2ha12(             Fir3_S[10], Fir3_C[9],  Sec2_S[10], Sec2_C[10] );
-HalfAdder	sec2ha13(             pp[8][11],  Fir3_C[10], Sec2_S[11], Sec2_C[11] );
+FullAdder	sec2fa2 ( Fir2_C[3],  Fir3_S[1],  Fir3_C[0],  Sec2_S[2],  Sec2_C[2]  );
+FullAdder	sec2fa3 ( Fir2_C[4],  Fir3_S[2],  Fir3_C[1],  Sec2_S[3],  Sec2_C[3]  );
+FullAdder	sec2fa4 ( Fir2_C[5],  Fir3_S[3],  Fir3_C[2],  Sec2_S[4],  Sec2_C[4]  );
+FullAdder	sec2fa5 ( Fir2_C[6],  Fir3_S[4],  Fir3_C[3],  Sec2_S[5],  Sec2_C[5]  );
+FullAdder	sec2fa6 ( Fir2_C[7],  Fir3_S[5],  Fir3_C[4],  Sec2_S[6],  Sec2_C[6]  );
+FullAdder	sec2fa7 ( Fir2_C[8],  Fir3_S[6],  Fir3_C[5],  Sec2_S[7],  Sec2_C[7]  );
+FullAdder	sec2fa8 ( Fir2_C[9],  Fir3_S[7],  Fir3_C[6],  Sec2_S[8],  Sec2_C[8]  );
+FullAdder	sec2fa9 ( Fir2_C[10], Fir3_S[8],  Fir3_C[7],  Sec2_S[9],  Sec2_C[9]  );
+FullAdder	sec2fa10( Fir2_C[11], Fir3_S[9],  Fir3_C[8],  Sec2_S[10], Sec2_C[10] );
+HalfAdder	sec2ha11(             Fir3_S[10], Fir3_C[9],  Sec2_S[11], Sec2_C[11] );
+HalfAdder	sec2ha12(             Fir3_S[11], Fir3_C[10], Sec2_S[12], Sec2_C[12] );
+HalfAdder	sec2ha13(             pp[8][11],  Fir3_C[11], Sec2_S[13], Sec2_C[13] );
 
 //============== Third Stage =================================================
 
-wire	[8:0]	Thi1_S, Thi1_C;
-wire	[13:0]	Thi2_S, Thi2_C;
+wire	[13: 0]	Thi1_S, Thi1_C;
+wire	[13: 0]	Thi2_S, Thi2_C;
 
-FullAdder	thi1fa5 ( Sec1_S[0],  1'b0     ,  Sec2_S[0],  Thi1_S[0], Thi1_C[0] );
-FullAdder	thi1fa6 ( Sec1_S[1],  Sec1_C[0],  Sec2_S[1],  Thi1_S[1], Thi1_C[1] );
-FullAdder	thi1fa7 ( Sec1_S[2],  Sec1_C[1],  Sec2_S[2],  Thi1_S[2], Thi1_C[2] );
-FullAdder	thi1fa8 ( Sec1_S[3],  Sec1_C[2],  Sec2_S[3],  Thi1_S[3], Thi1_C[3] );
-FullAdder	thi1fa9 ( Sec1_S[4],  Sec1_C[3],  Sec2_S[4],  Thi1_S[4], Thi1_C[4] );
-FullAdder	thi1fa10( Sec1_S[5],  Sec1_C[4],  Sec2_S[5],  Thi1_S[5], Thi1_C[5] );
-FullAdder	thi1fa11( Fir2_S[6],  Sec1_C[5],  Sec2_S[6],  Thi1_S[6], Thi1_C[6] );
-HalfAdder	thi1ha12(             Fir2_S[7],  Sec2_S[7],  Thi1_S[7], Thi1_C[7] );
-HalfAdder	thi1ha13(             pp[5][11],  Sec2_S[8],  Thi1_S[8], Thi1_C[8] );
+FullAdder	thi1fa5 ( Sec1_S[6],  Sec1_C[5],  Sec2_S[2],  Thi1_S[5],  Thi1_C[5]  );
+FullAdder	thi1fa6 ( Sec1_S[7],  Sec1_C[6],  Sec2_S[3],  Thi1_S[6],  Thi1_C[6]  );
+FullAdder	thi1fa7 ( Sec1_S[8],  Sec1_C[7],  Sec2_S[4],  Thi1_S[7],  Thi1_C[7]  );
+FullAdder	thi1fa8 ( Sec1_S[9],  Sec1_C[8],  Sec2_S[5],  Thi1_S[8],  Thi1_C[8]  );
+FullAdder	thi1fa9 ( Sec1_S[10], Sec1_C[9],  Sec2_S[6],  Thi1_S[9],  Thi1_C[9]  );
+FullAdder	thi1fa10( Sec1_S[11], Sec1_C[10], Sec2_S[7],  Thi1_S[10], Thi1_C[10] );
+FullAdder	thi1fa11( Fir2_S[10], Sec1_C[11], Sec2_S[8],  Thi1_S[11], Thi1_C[11] );
+HalfAdder	thi1ha12(             Fir2_S[11], Sec2_S[9],  Thi1_S[12], Thi1_C[12] );
+HalfAdder	thi1ha13(             pp[5][11],  Sec2_S[10], Thi1_S[13], Thi1_C[13] );
 
-HalfAdder	thi2ha0 ( Sec2_C[0],  pp[9][0],               Thi2_S[0],  Thi2_C[0]  );
-HalfAdder	thi2ha1 ( Sec2_C[1],  Fir4_S[0],              Thi2_S[1],  Thi2_C[1]  );
-FullAdder	thi2fa3 ( Sec2_C[2],  Fir4_S[1],  Fir4_C[0],  Thi2_S[2],  Thi2_C[2]  );
-FullAdder	thi2fa4 ( Sec2_C[3],  Fir4_S[2],  Fir4_C[1],  Thi2_S[3],  Thi2_C[3]  );
-FullAdder	thi2fa5 ( Sec2_C[4],  Fir4_S[3],  Fir4_C[2],  Thi2_S[4],  Thi2_C[4]  );
-FullAdder	thi2fa6 ( Sec2_C[5],  Fir4_S[4],  Fir4_C[3],  Thi2_S[5],  Thi2_C[5]  );
-FullAdder	thi2fa7 ( Sec2_C[6],  Fir4_S[5],  Fir4_C[4],  Thi2_S[6],  Thi2_C[6]  );
-FullAdder	thi2fa8 ( Sec2_C[7],  Fir4_S[6],  Fir4_C[5],  Thi2_S[7],  Thi2_C[7]  );
-FullAdder	thi2fa9 ( Sec2_C[8],  Fir4_S[7],  Fir4_C[6],  Thi2_S[8],  Thi2_C[8]  );
-FullAdder	thi2fa10( Sec2_C[9],  Fir4_S[8],  Fir4_C[7],  Thi2_S[9],  Thi2_C[9]  );
-FullAdder	thi2fa11( Sec2_C[10], Fir4_S[9],  Fir4_C[8],  Thi2_S[10], Thi2_C[10] );
-FullAdder	thi2fa12( Sec2_C[11], Fir4_S[10], Fir4_C[9],  Thi2_S[11], Thi2_C[11] );
+HalfAdder	thi2ha0 ( Sec2_C[2],  pp[9][0],               Thi2_S[0],  Thi2_C[0]  );
+HalfAdder	thi2ha1 ( Sec2_C[3],  Fir4_S[0],              Thi2_S[1],  Thi2_C[1]  );
+FullAdder	thi2fa3 ( Sec2_C[4],  Fir4_S[1],  Fir4_C[0],  Thi2_S[2],  Thi2_C[2]  );
+FullAdder	thi2fa4 ( Sec2_C[5],  Fir4_S[2],  Fir4_C[1],  Thi2_S[3],  Thi2_C[3]  );
+FullAdder	thi2fa5 ( Sec2_C[6],  Fir4_S[3],  Fir4_C[2],  Thi2_S[4],  Thi2_C[4]  );
+FullAdder	thi2fa6 ( Sec2_C[7],  Fir4_S[4],  Fir4_C[3],  Thi2_S[5],  Thi2_C[5]  );
+FullAdder	thi2fa7 ( Sec2_C[8],  Fir4_S[5],  Fir4_C[4],  Thi2_S[6],  Thi2_C[6]  );
+FullAdder	thi2fa8 ( Sec2_C[9],  Fir4_S[6],  Fir4_C[5],  Thi2_S[7],  Thi2_C[7]  );
+FullAdder	thi2fa9 ( Sec2_C[10], Fir4_S[7],  Fir4_C[6],  Thi2_S[8],  Thi2_C[8]  );
+FullAdder	thi2fa10( Sec2_C[11], Fir4_S[8],  Fir4_C[7],  Thi2_S[9],  Thi2_C[9] );
+FullAdder	thi2fa11( Sec2_C[12], Fir4_S[9],  Fir4_C[8],  Thi2_S[10], Thi2_C[10] );
+FullAdder	thi2fa12( Sec2_C[13], Fir4_S[10], Fir4_C[9],  Thi2_S[11], Thi2_C[11] );
 HalfAdder	thi2ha13(             Fir4_S[11], Fir4_C[10], Thi2_S[12], Thi2_C[12] );
 HalfAdder	thi2ha14(             pp[11][11], Fir4_C[11], Thi2_S[13], Thi2_C[13] );
 
 //============== Fourth Stage =================================================
 
-wire	[11:0]	Fou1_S, Fou1_C;
+wire	[15: 0]	Fou1_S, Fou1_C;
 
-FullAdder	fou1fa4 ( Thi1_S[0],  1'b0     ,  1'b0     ,  Fou1_S[0],  Fou1_C[0]  );
-FullAdder	fou1fa5 ( Thi1_S[1],  Thi1_C[0],  Thi2_S[0],  Fou1_S[1],  Fou1_C[1]  );
-FullAdder	fou1fa6 ( Thi1_S[2],  Thi1_C[1],  Thi2_S[1],  Fou1_S[2],  Fou1_C[2]  );
-FullAdder	fou1fa7 ( Thi1_S[3],  Thi1_C[2],  Thi2_S[2],  Fou1_S[3],  Fou1_C[3]  );
-FullAdder	fou1fa8 ( Thi1_S[4],  Thi1_C[3],  Thi2_S[3],  Fou1_S[4],  Fou1_C[4]  );
-FullAdder	fou1fa9 ( Thi1_S[5],  Thi1_C[4],  Thi2_S[4],  Fou1_S[5],  Fou1_C[5]  );
-FullAdder	fou1fa10( Thi1_S[6],  Thi1_C[5],  Thi2_S[5],  Fou1_S[6],  Fou1_C[6]  );
-FullAdder	fou1fa11( Thi1_S[7],  Thi1_C[6],  Thi2_S[6],  Fou1_S[7],  Fou1_C[7]  );
-FullAdder	fou1fa12( Thi1_S[8],  Thi1_C[7],  Thi2_S[7],  Fou1_S[8],  Fou1_C[8]  );
-FullAdder	fou1fa13( Sec2_S[9],  Thi1_C[8],  Thi2_S[8],  Fou1_S[9],  Fou1_C[9]  );
-HalfAdder	fou1ha14(             Sec2_S[10], Thi2_S[9],  Fou1_S[10], Fou1_C[10] );
-HalfAdder	fou1ha15(             Sec2_S[11], Thi2_S[10], Fou1_S[11], Fou1_C[11] );
+FullAdder	fou1fa4 ( Thi1_S[5],  Thi1_C[4],  Sec2_C[1],  Fou1_S[4],  Fou1_C[4]  );
+FullAdder	fou1fa5 ( Thi1_S[6],  Thi1_C[5],  Thi2_S[0],  Fou1_S[5],  Fou1_C[5]  );
+FullAdder	fou1fa6 ( Thi1_S[7],  Thi1_C[6],  Thi2_S[1],  Fou1_S[6],  Fou1_C[6]  );
+FullAdder	fou1fa7 ( Thi1_S[8],  Thi1_C[7],  Thi2_S[2],  Fou1_S[7],  Fou1_C[7]  );
+FullAdder	fou1fa8 ( Thi1_S[9],  Thi1_C[8],  Thi2_S[3],  Fou1_S[8],  Fou1_C[8]  );
+FullAdder	fou1fa9 ( Thi1_S[10], Thi1_C[9],  Thi2_S[4],  Fou1_S[9],  Fou1_C[9]  );
+FullAdder	fou1fa10( Thi1_S[11], Thi1_C[10], Thi2_S[5],  Fou1_S[10], Fou1_C[10] );
+FullAdder	fou1fa11( Thi1_S[12], Thi1_C[11], Thi2_S[6],  Fou1_S[11], Fou1_C[11] );
+FullAdder	fou1fa12( Thi1_S[13], Thi1_C[12], Thi2_S[7],  Fou1_S[12], Fou1_C[12] );
+FullAdder	fou1fa13( Sec2_S[11], Thi1_C[13], Thi2_S[8],  Fou1_S[13], Fou1_C[13] );
+HalfAdder	fou1ha14(             Sec2_S[12], Thi2_S[9],  Fou1_S[14], Fou1_C[14] );
+HalfAdder	fou1ha15(             Sec2_S[13], Thi2_S[10], Fou1_S[15], Fou1_C[15] );
 
 //============== Fifth Stage =================================================
 
-wire	[14:0]	Fif_S, Fif_C;
+wire	[17: 0]	Fif_S, Fif_C;
 
-HalfAdder	fifha3 ( Fou1_S[0],  1'b0     ,              Fif_S[0],  Fif_C[0]  );
-HalfAdder	fifha4 ( Fou1_S[1],  Fou1_C[0],              Fif_S[1],  Fif_C[1]  );
-FullAdder	fiffa5 ( Fou1_S[2],  Fou1_C[1],  Thi2_C[0],  Fif_S[2],  Fif_C[2]  );
-FullAdder	fiffa6 ( Fou1_S[3],  Fou1_C[2],  Thi2_C[1],  Fif_S[3],  Fif_C[3]  );
-FullAdder	fiffa7 ( Fou1_S[4],  Fou1_C[3],  Thi2_C[2],  Fif_S[4],  Fif_C[4]  );
-FullAdder	fiffa8 ( Fou1_S[5],  Fou1_C[4],  Thi2_C[3],  Fif_S[5],  Fif_C[5]  );
-FullAdder	fiffa9 ( Fou1_S[6],  Fou1_C[5],  Thi2_C[4],  Fif_S[6],  Fif_C[6]  );
-FullAdder	fiffa10( Fou1_S[7],  Fou1_C[6],  Thi2_C[5],  Fif_S[7],  Fif_C[7]  );
-FullAdder	fiffa11( Fou1_S[8],  Fou1_C[7],  Thi2_C[6],  Fif_S[8],  Fif_C[8]  );
-FullAdder	fiffa12( Fou1_S[9],  Fou1_C[8],  Thi2_C[7],  Fif_S[9],  Fif_C[9]  );
-FullAdder	fiffa13( Fou1_S[10], Fou1_C[9],  Thi2_C[8],  Fif_S[10], Fif_C[10] );
-FullAdder	fiffa14( Fou1_S[11], Fou1_C[10], Thi2_C[9],  Fif_S[11], Fif_C[11] );
-FullAdder	fiffa15( Thi2_S[11], Fou1_C[11], Thi2_C[10], Fif_S[12], Fif_C[12] );
-HalfAdder	fifha16(             Thi2_S[12], Thi2_C[11], Fif_S[13], Fif_C[13] );
-HalfAdder	fifha17(             Thi2_S[13], Thi2_C[12], Fif_S[14], Fif_C[14] );
+HalfAdder	fifha3 ( Fou1_S[4],  Fou1_C[3],              Fif_S[3],  Fif_C[3]  );
+HalfAdder	fifha4 ( Fou1_S[5],  Fou1_C[4],              Fif_S[4],  Fif_C[4]  );
+FullAdder	fiffa5 ( Fou1_S[6],  Fou1_C[5],  Thi2_C[0],  Fif_S[5],  Fif_C[5]  );
+FullAdder	fiffa6 ( Fou1_S[7],  Fou1_C[6],  Thi2_C[1],  Fif_S[6],  Fif_C[6]  );
+FullAdder	fiffa7 ( Fou1_S[8],  Fou1_C[7],  Thi2_C[2],  Fif_S[7],  Fif_C[7]  );
+FullAdder	fiffa8 ( Fou1_S[9],  Fou1_C[8],  Thi2_C[3],  Fif_S[8],  Fif_C[8]  );
+FullAdder	fiffa9 ( Fou1_S[10], Fou1_C[9],  Thi2_C[4],  Fif_S[9],  Fif_C[9]  );
+FullAdder	fiffa10( Fou1_S[11], Fou1_C[10], Thi2_C[5],  Fif_S[10], Fif_C[10] );
+FullAdder	fiffa11( Fou1_S[12], Fou1_C[11], Thi2_C[6],  Fif_S[11], Fif_C[11] );
+FullAdder	fiffa12( Fou1_S[13], Fou1_C[12], Thi2_C[7],  Fif_S[12], Fif_C[12] );
+FullAdder	fiffa13( Fou1_S[14], Fou1_C[13], Thi2_C[8],  Fif_S[13], Fif_C[13] );
+FullAdder	fiffa14( Fou1_S[15], Fou1_C[14], Thi2_C[9],  Fif_S[14], Fif_C[14] );
+FullAdder	fiffa15( Thi2_S[11], Fou1_C[15], Thi2_C[10], Fif_S[15], Fif_C[15] );
+HalfAdder	fifha16(             Thi2_S[12], Thi2_C[11], Fif_S[16], Fif_C[16] );
+HalfAdder	fifha17(             Thi2_S[13], Thi2_C[12], Fif_S[17], Fif_C[17] );
 
 //============== Result Assignment ============================================
 
-assign	opa = { Thi2_C[13], Fif_S[14:0]};
-assign	opb = { Fif_C[14:0],1'b0};
+assign	opa = { Thi2_C[13], Fif_S[17: 3]};
+assign	opb = { Fif_C[17: 2]};
 
 reg [15:0]opa_reg, opb_reg;
 
@@ -494,7 +548,6 @@ assign result_out = {result_temp,8'b0};
 
 
 endmodule
-
 
 module CosRom(
     input clk,
@@ -1609,19 +1662,19 @@ reg [9:0] div_in;
 
 always @(posedge clk) begin
     casez (add_in)
-        13'b000000000000?:begin sft_reg_1 <= 4'b0000; div_in <= 0;                   end
-        13'b000000000001?:begin sft_reg_1 <= 4'b0001; div_in <= {add_in[0]  ,9'b0};  end
-        13'b00000000001??:begin sft_reg_1 <= 4'b0010; div_in <= {add_in[1:0],8'b0};  end
-        13'b0000000001???:begin sft_reg_1 <= 4'b0011; div_in <= {add_in[2:0],7'b0};  end
-        13'b000000001????:begin sft_reg_1 <= 4'b0100; div_in <= {add_in[3:0],6'b0};  end
-        13'b00000001?????:begin sft_reg_1 <= 4'b0101; div_in <= {add_in[4:0],5'b0};  end
-        13'b0000001??????:begin sft_reg_1 <= 4'b0110; div_in <= {add_in[5:0],4'b0};  end
-        13'b000001???????:begin sft_reg_1 <= 4'b0111; div_in <= {add_in[6:0],3'b0};  end
-        13'b00001????????:begin sft_reg_1 <= 4'b1000; div_in <= {add_in[7:0],2'b0};  end
-        13'b0001?????????:begin sft_reg_1 <= 4'b1001; div_in <= {add_in[8:0],1'b0};  end
-        13'b001??????????:begin sft_reg_1 <= 4'b1010; div_in <= add_in[9:0];         end
-        13'b01???????????:begin sft_reg_1 <= 4'b1011; div_in <= add_in[10:1];        end
-        13'b1????????????:begin sft_reg_1 <= 4'b1100; div_in <= add_in[11:2];        end
+        13'b000000000000?:begin sft_reg_1 <= 4'b0000; div_in <= 10'b0             ; end
+        13'b000000000001?:begin sft_reg_1 <= 4'b0001; div_in <= {add_in[0]  ,9'b0}; end
+        13'b00000000001??:begin sft_reg_1 <= 4'b0010; div_in <= {add_in[1:0],8'b0}; end
+        13'b0000000001???:begin sft_reg_1 <= 4'b0011; div_in <= {add_in[2:0],7'b0}; end
+        13'b000000001????:begin sft_reg_1 <= 4'b0100; div_in <= {add_in[3:0],6'b0}; end
+        13'b00000001?????:begin sft_reg_1 <= 4'b0101; div_in <= {add_in[4:0],5'b0}; end
+        13'b0000001??????:begin sft_reg_1 <= 4'b0110; div_in <= {add_in[5:0],4'b0}; end
+        13'b000001???????:begin sft_reg_1 <= 4'b0111; div_in <= {add_in[6:0],3'b0}; end
+        13'b00001????????:begin sft_reg_1 <= 4'b1000; div_in <= {add_in[7:0],2'b0}; end
+        13'b0001?????????:begin sft_reg_1 <= 4'b1001; div_in <= {add_in[8:0],1'b0}; end
+        13'b001??????????:begin sft_reg_1 <= 4'b1010; div_in <= add_in[9:0]       ; end
+        13'b01???????????:begin sft_reg_1 <= 4'b1011; div_in <= add_in[10:1]      ; end
+        13'b1????????????:begin sft_reg_1 <= 4'b1100; div_in <= add_in[11:2]      ; end
     endcase
 end
 
@@ -2682,4 +2735,6 @@ endcase
 end
 
 endmodule
+
+
 

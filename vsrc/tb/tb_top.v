@@ -1,4 +1,3 @@
-
 module tb_top;
 
     reg clk;
@@ -22,10 +21,19 @@ module tb_top;
 
     initial begin
         clk = 1;
-        forever #5 clk = ~clk;
+        forever #2.5 clk = ~clk;
     end
     
     integer i;
+
+    initial begin
+	#10;
+	repeat (12) begin
+            e = $random % 2;
+		$display("d: %0b", uut.d_reg);
+            #5;
+        end
+    end
 
     initial begin
 
@@ -35,13 +43,10 @@ module tb_top;
         c = 0;
         e = 0;
 
-        #20;
+        #7.5;
         rst = 0;
-
-        repeat (12) begin
-            e = $random % 2;
-            #10;
-        end
+	#62.5;
+        
 
         e = 0;
         for (i = 0; i < 20; i = i + 1) begin
@@ -49,23 +54,25 @@ module tb_top;
             b = $random % 4096;
             c = $random % 4096;
             $display("Index: %0d | a: %0d | b: %0d | c: %0d | d: %0d", i,  a,b,c,uut.d_reg);
-            #10;
+            #5;
 
         end
 
-        #100;
+        #50;
         
     end
 
     initial begin
-        #120;
-        #100;
+        #110;
         for (i = 0; i < 20; i = i + 1) begin
             $display("Index: %0d | y_decimal: %0d", i,  y[12:0]);
-            #10;
+            #5;
         end
-        #10;
+        #5;
         $finish;
     end
 
 endmodule
+
+
+
