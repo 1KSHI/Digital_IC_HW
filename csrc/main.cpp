@@ -15,6 +15,9 @@ int c_mem[TEST_NUM];
 
 int count = 0;
 int success = 0;
+int critical_fail = 0;
+int error_fail = 0;
+int fail = 0;
 
 int a = 2040;
 int b = 795;
@@ -46,34 +49,40 @@ void cor_y(int a,int b, int c, int d){
     
     if(error < pow(2, -10)){
         success++;
-        #if PRINTF_DAT 
         fprintf(output_file,"*PASS*\n");
         fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
-        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
         fprintf(output_file,"y_true=%.15f  ", y_true);
+        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
         fprintf(output_file,"error=%.15f \n", error);
-        fprintf(output_file,"-----------------------------------------------\n");
-        #endif
-    }else{
+    }else if(error < pow(2, -9)){
         //#if PRINTF_DAT 
-        printf("*FAIL*\n");
-        printf("a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
-        printf("y_true=%.15f  ", y_true);
-        printf("y=%.15f  ", y_result/pow(2,12));
-        printf("error=%.15f \n", error);
-        printf("count=%d\n", count);
-        printf("-----------------------------------------------\n");
-
+        fail++;
         fprintf(output_file,"*FAIL*\n");
         fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
         fprintf(output_file,"y_true=%.15f  ", y_true);
         fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
         fprintf(output_file,"error=%.15f \n", error);
-        fprintf(output_file,"-----------------------------------------------\n");
+        //#endif
+    }else if(error < pow(2, -8)){
+        //#if PRINTF_DAT 
+        critical_fail++;
+        fprintf(output_file,"*CRITICAL FAIL*\n");
+        fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        fprintf(output_file,"y_true=%.15f  ", y_true);
+        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
+        fprintf(output_file,"error=%.15f \n", error);
+        //#endif
+    }else {
+        //#if PRINTF_DAT 
+        error_fail++;
+        fprintf(output_file,"*ERROR*\n");
+        fprintf(output_file,"a=%d, b=%d, c=%d, d=%d\n", a, b, c, d);
+        fprintf(output_file,"y_true=%.15f  ", y_true);
+        fprintf(output_file,"y=%.15f  ", y_result/pow(2,12));
+        fprintf(output_file,"error=%.15f \n", error);
         //#endif
     }
-
-    //printf("y=%x  ", top->y);
+    fprintf(output_file,"------------------------------------------------------------------------\n");
     
     count++;
 
@@ -146,7 +155,7 @@ void fix_test(){
 int main(int argc, char *argv[]) {
     sim_init();
     reset();
-    output_file = fopen("output.txt", "w");
+    output_file = fopen("test10.error.rpt", "w");
     if (!output_file) {
         printf("Error: Unable to open output.txt for writing.\n");
         return 1;
@@ -161,7 +170,14 @@ int main(int argc, char *argv[]) {
     data_test(TEST_NUM);
 
     cycle(8);
-    printf("total=%d, success=%d, rate=%.2f%%\n", count, success, (float)success/count*100);
+    printf("                                   TOTAL REPORT                                      \n");
+    printf("-------------------------------------------------------------------------------------\n");
+    printf("Success:            2^-10 > error > ...  \n");
+    printf("Warinig:            2^-9  > error > 2^-10\n");
+    printf("Critical Error:     2^-8  > error > 2^-9 \n");
+    printf("Fatal Error:        ...   > error > 2^-8 \n");
+    printf("-------------------------------------------------------------------------------------\n");
+    printf("total=%d, success=%.2f%%, Warinig=%.2f%%, Critical Error=%.2f%%, Fatal Error=%.2f%%, \n", count, (float)success/count*100, (float)fail/count*100, (float)critical_fail/count*100, (float)error_fail/count*100);
 
     sim_exit();
 

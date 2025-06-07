@@ -55,7 +55,7 @@ void sim_init(){
   #endif
   top->trace(tfp, 10);
   #if CONFIG_WAVETRACE
-  tfp->open("dump.vcd");
+  tfp->open("test10.vcd");
   #endif
 }
 
